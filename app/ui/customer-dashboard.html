@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .welcome-section {
+            margin-bottom: 40px;
+        }
+
+        .welcome-section h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .welcome-section p {
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .decisions-list {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .decision-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .decision-item:last-child {
+            border-bottom: none;
+        }
+
+        .decision-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .risk-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .risk-high {
+            background: rgba(255, 59, 48, 0.2);
+            color: #FF3B30;
+        }
+
+        .risk-medium {
+            background: rgba(255, 149, 0, 0.2);
+            color: #FF9500;
+        }
+
+        .risk-low {
+            background: rgba(52, 199, 89, 0.2);
+            color: #34C759;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">PatchPulse</div>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div>
+                    <div id="userEmail" style="font-weight: 600;"></div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Customer</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome back!</h1>
+            <p>Monitor your Kubernetes deployments and risk decisions</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalDecisions">-</div>
+                <div class="stat-label">Total Decisions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="blockedCount">-</div>
+                <div class="stat-label">Risky Changes Blocked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgRisk">-</div>
+                <div class="stat-label">Average Risk Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="reposMonitored">-</div>
+                <div class="stat-label">Repositories Monitored</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Recent Decisions</h2>
+        <div class="decisions-list" id="decisionsList">
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                Loading decisions...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('patchpulse_token');
+        const user = JSON.parse(localStorage.getItem('patchpulse_user') || '{}');
+
+        if (!token) {
+            window.location.href = '/login.html';
+        }
+
+        // Display user info
+        if (user.email) {
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userAvatar').textContent = user.email.charAt(0).toUpperCase();
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/v1/analytics/summary', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('totalDecisions').textContent = data.total_decisions || 0;
+                    document.getElementById('blockedCount').textContent = data.blocked_count || 0;
+                    document.getElementById('avgRisk').textContent = Math.round(data.avg_risk_score || 0);
+                    document.getElementById('reposMonitored').textContent = data.repos_monitored || 0;
+                }
+            } catch (e) {
+                console.error('Failed to load analytics:', e);
+            }
+
+            // Load recent decisions
+            try {
+                const decisionsResponse = await fetch('/api/v1/decisions?limit=10', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (decisionsResponse.ok) {
+                    const decisions = await decisionsResponse.json();
+                    displayDecisions(decisions);
+                }
+            } catch (e) {
+                console.error('Failed to load decisions:', e);
+            }
+        }
+
+        function displayDecisions(decisions) {
+            const list = document.getElementById('decisionsList');
+            
+            if (!decisions || decisions.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No decisions yet. Create a change event to see risk analysis.</div>';
+                return;
+            }
+
+            list.innerHTML = decisions.map(decision => {
+                const riskClass = decision.risk_score >= 70 ? 'risk-high' : 
+                                 decision.risk_score >= 40 ? 'risk-medium' : 'risk-low';
+                const riskLabel = decision.risk_score >= 70 ? 'High Risk' : 
+                                 decision.risk_score >= 40 ? 'Medium Risk' : 'Low Risk';
+                
+                return `
+                    <div class="decision-item">
+                        <div class="decision-header">
+                            <div>
+                                <strong>Change Event #${decision.change_event_id.substring(0, 8)}</strong>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">
+                                    ${new Date(decision.created_at).toLocaleString()}
+                                </div>
+                            </div>
+                            <div class="risk-badge ${riskClass}">${riskLabel} (${decision.risk_score}/100)</div>
+                        </div>
+                        <div style="margin-top: 12px; color: var(--text-secondary);">
+                            ${decision.allowed ? '✅ Allowed' : '❌ Blocked'} - ${decision.reasons?.[0] || 'No reason provided'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('patchpulse_token');
+            localStorage.removeItem('patchpulse_user');
+            window.location.href = '/login.html';
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
+

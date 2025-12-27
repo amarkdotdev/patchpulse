@@ -39,10 +39,10 @@ services:
       - ./marketing:/app/marketing
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
-  agent:
-    build:
-      context: ./agent
-      dockerfile: Dockerfile
+        agent:
+          build:
+            context: ./app/agent
+            dockerfile: Dockerfile
     environment:
       BACKEND_URL: http://backend:8000
       KUBECONFIG: /root/.kube/config
@@ -53,10 +53,10 @@ services:
     # Note: Agent requires access to Kubernetes cluster
     # For local dev, mount kubeconfig
 
-  git-poller:
-    build:
-      context: ./integrations/git
-      dockerfile: Dockerfile
+        git-poller:
+          build:
+            context: ./app/integrations/git
+            dockerfile: Dockerfile
     environment:
       BACKEND_URL: http://backend:8000
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}

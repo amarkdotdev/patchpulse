@@ -87,36 +87,64 @@ app.add_middleware(
 
 # Mount UI static files as dashboard
 try:
-    app.mount("/dashboard", StaticFiles(directory="ui", html=True), name="dashboard")
+    app.mount("/dashboard", StaticFiles(directory="/app/ui", html=True), name="dashboard")
     logger.info("Dashboard mounted at /dashboard")
 except Exception:
     logger.warning("UI directory not found, skipping static file mount")
 
-# Mount marketing site
-try:
-    app.mount("/marketing", StaticFiles(directory="marketing", html=True), name="marketing")
-except Exception:
-    logger.warning("Marketing directory not found, skipping static file mount")
-
 
 @app.get("/")
 async def root():
-    """Root endpoint - redirects to marketing site."""
-    from fastapi.responses import RedirectResponse
-    try:
-        # Try to serve marketing index
-        return RedirectResponse(url="/marketing/")
-    except:
-        return {
-            "name": "PatchPulse API",
-            "version": "1.0.0",
-            "endpoints": {
-                "marketing": "/marketing/",
-                "dashboard": "/dashboard",
-                "api": "/api/v1",
-                "docs": "/docs"
-            }
+    """Serve marketing index page at root."""
+    from fastapi.responses import FileResponse
+    import os
+    index_path = os.path.join("/app/website", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"name": "PatchPulse API", "version": "1.0.0"}
+
+
+@app.get("/{path:path}")
+async def serve_marketing(path: str):
+    """Serve marketing static files."""
+    from fastapi.responses import FileResponse
+    import os
+    
+    # Don't serve API routes, dashboard, docs, or health
+    if path.startswith("api/") or path.startswith("dashboard") or path.startswith("docs") or path == "health" or path == "metrics":
+        raise HTTPException(status_code=404)
+    
+    # Try marketing directory first
+    file_path = os.path.join("marketing", path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    
+    # Try as HTML file
+    if not path.endswith((".html", ".css", ".js", ".png", ".jpg", ".svg", ".ico", ".json")):
+        html_path = os.path.join("marketing", f"{path}.html")
+        if os.path.exists(html_path):
+            return FileResponse(html_path)
+    
+    # Default to index.html for directories
+    index_path = os.path.join("marketing", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    
+    raise HTTPException(status_code=404, detail="File not found")
+
+
+@app.get("/api")
+async def api_info():
+    """API information endpoint."""
+    return {
+        "name": "PatchPulse API",
+        "version": "1.0.0",
+        "endpoints": {
+            "dashboard": "/dashboard",
+            "api": "/api/v1",
+            "docs": "/docs"
         }
+    }
 
 
 @app.get("/health")
@@ -129,6 +157,44 @@ async def health():
 async def metrics():
     """Prometheus metrics endpoint."""
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
+@app.post("/api/v1/auth/login")
+async def login(request: Request):
+    """Login endpoint - authenticates users and returns JWT token."""
+    from backend.auth import create_access_token
+    try:
+        body = await request.json()
+        email = body.get("email", "")
+        password = body.get("password", "")
+        
+        # For demo/production: validate credentials
+        # In production, verify against your auth provider (Auth0, Okta, etc.)
+        if not email or not password:
+            raise HTTPException(status_code=400, detail="Email and password required")
+        
+        # Demo mode: accept any credentials
+        # Production: verify against database/auth provider
+        user_id = email.split("@")[0] if "@" in email else email
+        
+        access_token = create_access_token(
+            data={"sub": user_id, "email": email, "role": "user"}
+        )
+        
+        logger.info(f"User logged in: {email}")
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "username": user_id,
+                "email": email,
+                "role": "user"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 @app.post("/api/v1/change-events", response_model=Dict)

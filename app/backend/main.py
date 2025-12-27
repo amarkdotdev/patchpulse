@@ -87,10 +87,20 @@ app.add_middleware(
 
 # Mount UI static files as dashboard
 try:
-    app.mount("/dashboard", StaticFiles(directory="/app/ui", html=True), name="dashboard")
-    logger.info("Dashboard mounted at /dashboard")
-except Exception:
-    logger.warning("UI directory not found, skipping static file mount")
+    import os
+    ui_paths = ["/app/ui", "app/ui", os.path.join(os.getcwd(), "app", "ui")]
+    ui_dir = None
+    for path in ui_paths:
+        if os.path.exists(path):
+            ui_dir = path
+            break
+    if ui_dir:
+        app.mount("/dashboard", StaticFiles(directory=ui_dir, html=True), name="dashboard")
+        logger.info(f"Dashboard mounted at /dashboard from {ui_dir}")
+    else:
+        logger.warning("UI directory not found, skipping static file mount")
+except Exception as e:
+    logger.warning(f"UI directory not found, skipping static file mount: {e}")
 
 
 @app.get("/")

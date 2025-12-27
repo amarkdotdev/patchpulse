@@ -127,3 +127,65 @@ class DecisionResponse(BaseModel):
     policy_version: str
     created_at: datetime
 
+
+# Blog Post Models
+class BlogPostDB(Base):
+    """Blog post in database."""
+    __tablename__ = "blog_posts"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    title = Column(String, nullable=False)
+    slug = Column(String, unique=True, nullable=False, index=True)
+    content = Column(Text, nullable=False)  # HTML content from rich text editor
+    excerpt = Column(Text)  # Short summary
+    author = Column(String, default="PatchPulse Team")
+    featured_image = Column(String)  # URL to featured image
+    status = Column(String, default="published")  # draft, published, archived
+    tags = Column(JSON)  # List of tags
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    published_at = Column(DateTime)  # When it was published
+
+
+class BlogPost(BaseModel):
+    """Pydantic model for blog post."""
+    id: Optional[str] = None
+    title: str
+    slug: Optional[str] = None
+    content: str  # HTML content
+    excerpt: Optional[str] = None
+    author: str = "PatchPulse Team"
+    featured_image: Optional[str] = None
+    status: str = "published"  # draft, published, archived
+    tags: Optional[List[str]] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    published_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BlogPostCreate(BaseModel):
+    """Model for creating a blog post."""
+    title: str
+    slug: Optional[str] = None
+    content: str
+    excerpt: Optional[str] = None
+    author: str = "PatchPulse Team"
+    featured_image: Optional[str] = None
+    status: str = "published"
+    tags: Optional[List[str]] = None
+
+
+class BlogPostUpdate(BaseModel):
+    """Model for updating a blog post."""
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    content: Optional[str] = None
+    excerpt: Optional[str] = None
+    author: Optional[str] = None
+    featured_image: Optional[str] = None
+    status: Optional[str] = None
+    tags: Optional[List[str]] = None
+

@@ -107,19 +107,32 @@
             box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
         }
 
-        .demo-note {
-            background: rgba(0, 122, 255, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 24px;
+        .login-link {
             text-align: center;
+            margin-top: 24px;
             font-size: 14px;
             color: var(--text-secondary);
         }
 
-        .demo-note strong {
+        .login-link a {
             color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid #FF3B30;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #FF3B30;
+            font-size: 14px;
+            display: none;
         }
     </style>
 </head>
@@ -130,6 +143,8 @@
             <p>Log in to your PatchPulse dashboard</p>
         </div>
 
+        <div id="errorMessage" class="error-message"></div>
+
         <form onsubmit="handleLogin(event)">
             <div class="form-group">
                 <label>Email</label>
@@ -139,11 +154,11 @@
                 <label>Password</label>
                 <input type="password" id="password" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="login-btn">Log In</button>
+            <button type="submit" class="login-btn" id="loginBtn">Log In</button>
         </form>
 
-        <div class="demo-note">
-            <strong>Demo Mode:</strong> Any credentials accepted. Click "Log In" to access the dashboard.
+        <div class="login-link">
+            Don't have an account? <a href="/signup">Sign up for free</a>
         </div>
     </div>
 
@@ -153,7 +168,10 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
-            const loginBtn = event.target.querySelector('button[type="submit"]');
+            const loginBtn = document.getElementById('loginBtn');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            errorDiv.style.display = 'none';
             const originalText = loginBtn.textContent;
             loginBtn.textContent = 'Logging in...';
             loginBtn.disabled = true;
@@ -170,16 +188,18 @@
                     // Store token and user info
                     localStorage.setItem('patchpulse_token', data.access_token);
                     localStorage.setItem('patchpulse_user', JSON.stringify(data.user));
-                    // Redirect to customer dashboard
+                    // Redirect to dashboard
                     window.location.href = '/dashboard';
                 } else {
                     const error = await response.json();
-                    alert(error.detail || 'Login failed. Please try again.');
+                    errorDiv.textContent = error.detail || 'Invalid email or password. Please try again.';
+                    errorDiv.style.display = 'block';
                     loginBtn.textContent = originalText;
                     loginBtn.disabled = false;
                 }
             } catch (e) {
-                alert('Connection error. Please try again.');
+                errorDiv.textContent = 'Connection error. Please try again.';
+                errorDiv.style.display = 'block';
                 loginBtn.textContent = originalText;
                 loginBtn.disabled = false;
             }

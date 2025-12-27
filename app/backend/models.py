@@ -189,3 +189,49 @@ class BlogPostUpdate(BaseModel):
     status: Optional[str] = None
     tags: Optional[List[str]] = None
 
+
+# User Models
+class UserDB(Base):
+    """User in database."""
+    __tablename__ = "users"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    email = Column(String, unique=True, nullable=False, index=True)
+    password_hash = Column(String, nullable=False)  # Hashed password
+    full_name = Column(String)
+    company = Column(String)
+    plan = Column(String, default="free")  # free, professional, enterprise
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_login = Column(DateTime)
+    is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
+
+
+class User(BaseModel):
+    """Pydantic model for user."""
+    id: Optional[str] = None
+    email: str
+    full_name: Optional[str] = None
+    company: Optional[str] = None
+    plan: str = "free"
+    created_at: Optional[datetime] = None
+    is_active: bool = True
+
+    class Config:
+        from_attributes = True
+
+
+class UserSignup(BaseModel):
+    """Model for user signup."""
+    email: str
+    password: str
+    full_name: Optional[str] = None
+    company: Optional[str] = None
+
+
+class UserLogin(BaseModel):
+    """Model for user login."""
+    email: str
+    password: str
+

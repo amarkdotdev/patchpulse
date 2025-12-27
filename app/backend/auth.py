@@ -1,21 +1,36 @@
-"""Simple authentication for demo/production."""
+"""Production-ready authentication system."""
 
 import os
 import secrets
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+from models import UserDB
+from database import get_db
 
-# For demo, use a simple token-based auth
-# In production, integrate with your SSO/OAuth provider
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 security = HTTPBearer(auto_error=False)
+
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash."""
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -30,22 +45,31 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = None) -> dict:
+def verify_token(credentials: Optional[HTTPAuthorizationCredentials] = None, db: Session = None) -> dict:
     """Verify JWT token and return user data."""
-    # For demo, allow anonymous access but track user
     if not credentials:
-        return {"user_id": "demo", "email": "demo@patchpulse.io", "role": "demo"}
+        raise HTTPException(status_code=401, detail="Not authenticated")
     
     try:
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        
+        if db and user_id:
+            user = db.query(UserDB).filter(UserDB.id == user_id).first()
+            if not user or not user.is_active:
+                raise HTTPException(status_code=401, detail="User not found or inactive")
+            return {"user_id": user.id, "email": user.email, "plan": user.plan, "is_admin": user.is_admin}
+        
         return payload
     except JWTError:
-        # For demo, still allow access
-        return {"user_id": "demo", "email": "demo@patchpulse.io", "role": "demo"}
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
-async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = None):
+async def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+):
     """Get current user from token."""
-    return verify_token(credentials)
+    return verify_token(credentials, db)
 

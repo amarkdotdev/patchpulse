@@ -2,12 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY backend/requirements.txt .
+COPY app/backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend/ .
-COPY ui/ /app/ui/
-COPY marketing/ /app/marketing/
+COPY app/backend/ .
+COPY app/ui/ /app/ui/
+COPY website/ /app/website/
 
 EXPOSE 8000
 

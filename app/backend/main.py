@@ -162,7 +162,7 @@ async def metrics():
 @app.post("/api/v1/auth/login")
 async def login(request: Request):
     """Login endpoint - authenticates users and returns JWT token."""
-    from backend.auth import create_access_token
+    from auth import create_access_token
     try:
         body = await request.json()
         email = body.get("email", "")

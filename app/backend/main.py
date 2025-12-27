@@ -274,37 +274,6 @@ async def login(credentials: UserLogin, db: Session = Depends(get_db)):
             "plan": user.plan
         }
     }
-        body = await request.json()
-        email = body.get("email", "")
-        password = body.get("password", "")
-        
-        # For demo/production: validate credentials
-        # In production, verify against your auth provider (Auth0, Okta, etc.)
-        if not email or not password:
-            raise HTTPException(status_code=400, detail="Email and password required")
-        
-        # Demo mode: accept any credentials
-        # Production: verify against database/auth provider
-        user_id = email.split("@")[0] if "@" in email else email
-        
-        access_token = create_access_token(
-            data={"sub": user_id, "email": email, "role": "user"}
-        )
-        
-        logger.info(f"User logged in: {email}")
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "username": user_id,
-                "email": email,
-                "role": "user"
-            }
-        }
-    except Exception as e:
-        logger.error(f"Login error: {e}")
-        raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 @app.post("/api/v1/change-events", response_model=Dict)

@@ -25,144 +25,272 @@
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            padding: 40px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 80px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 40px;
         }
 
-        .header h1 {
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-header h1 {
             font-size: 56px;
             font-weight: 900;
             margin-bottom: 20px;
         }
 
-        .blog-post {
+        .page-header p {
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 32px;
+            margin-bottom: 60px;
+        }
+
+        .post-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 40px;
+            border-radius: 16px;
+            overflow: hidden;
             transition: all 0.3s;
             cursor: pointer;
         }
 
-        .blog-post:hover {
-            transform: translateY(-4px);
+        .post-card:hover {
             border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.2);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: var(--bg-primary);
+        }
+
+        .post-content {
+            padding: 24px;
         }
 
         .post-meta {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
             font-size: 14px;
-            color: var(--text-tertiary);
-        }
-
-        .post-tag {
-            background: var(--bg-primary);
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--primary);
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
         .post-title {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            line-height: 1.3;
         }
 
         .post-excerpt {
-            font-size: 18px;
             color: var(--text-secondary);
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
-        .post-link {
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            background: rgba(0, 122, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            font-size: 12px;
             color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .admin-link {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
             text-decoration: none;
             font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            transition: all 0.3s;
         }
 
-        .post-link:hover {
-            gap: 12px;
+        .admin-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Latest from PatchPulse</h1>
-            <p>Insights, updates, and best practices</p>
-        </div>
-
-        <div class="blog-post">
-            <div class="post-meta">
-                <span>December 27, 2024</span>
-                <span class="post-tag">Product</span>
-                <span>5 min read</span>
+    <div class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">PatchPulse</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/about" class="nav-link">About</a>
+                <a href="/blog" class="nav-link">Blog</a>
+                <a href="/contact" class="nav-link">Contact</a>
+                <a href="/login" class="nav-link">Log In</a>
             </div>
-            <h2 class="post-title">How We Prevented $2M in Production Incidents</h2>
-            <p class="post-excerpt">
-                Learn how PatchPulse's AI-powered guardrails caught critical issues before they reached production. Real stories from teams using PatchPulse in production.
-            </p>
-            <a href="#" class="post-link">Read more →</a>
-        </div>
-
-        <div class="blog-post">
-            <div class="post-meta">
-                <span>December 20, 2024</span>
-                <span class="post-tag">Engineering</span>
-                <span>8 min read</span>
-            </div>
-            <h2 class="post-title">Building Explainable AI for Kubernetes</h2>
-            <p class="post-excerpt">
-                Deep dive into how we built PatchPulse's explainable AI system. Every decision comes with concrete evidence - here's how we make that possible.
-            </p>
-            <a href="#" class="post-link">Read more →</a>
-        </div>
-
-        <div class="blog-post">
-            <div class="post-meta">
-                <span>December 15, 2024</span>
-                <span class="post-tag">Best Practices</span>
-                <span>6 min read</span>
-            </div>
-            <h2 class="post-title">10 Kubernetes Deployment Anti-Patterns to Avoid</h2>
-            <p class="post-excerpt">
-                Common mistakes teams make when deploying to Kubernetes, and how PatchPulse helps catch them automatically. Learn from real-world examples.
-            </p>
-            <a href="#" class="post-link">Read more →</a>
-        </div>
-
-        <div class="blog-post">
-            <div class="post-meta">
-                <span>December 10, 2024</span>
-                <span class="post-tag">Announcement</span>
-                <span>3 min read</span>
-            </div>
-            <h2 class="post-title">PatchPulse 1.0: Production Ready</h2>
-            <p class="post-excerpt">
-                We're excited to announce PatchPulse 1.0! After months of development and testing with early customers, we're ready for production use.
-            </p>
-            <a href="#" class="post-link">Read more →</a>
         </div>
     </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Blog</h1>
+            <p>Latest insights on Kubernetes, DevOps, and SRE best practices</p>
+        </div>
+
+        <div id="postsContainer" class="posts-grid">
+            <div class="empty-state">
+                <h3>Loading posts...</h3>
+            </div>
+        </div>
+    </div>
+
+    <a href="/blog-admin" class="admin-link">✏️ Admin</a>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function loadPosts() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/blog/posts?status=published`);
+                const posts = await response.json();
+                displayPosts(posts);
+            } catch (e) {
+                console.error('Failed to load posts:', e);
+                document.getElementById('postsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <h3>No blog posts yet</h3>
+                        <p>Check back soon for updates!</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            
+            if (posts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No blog posts yet</h3>
+                        <p>Check back soon for updates!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = posts.map(post => {
+                const excerpt = post.excerpt || (post.content ? post.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : '');
+                const date = new Date(post.published_at || post.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                return `
+                    <div class="post-card" onclick="viewPost('${post.slug}')">
+                        ${post.featured_image ? `<img src="${post.featured_image}" alt="${post.title}" class="post-image">` : ''}
+                        <div class="post-content">
+                            <div class="post-meta">
+                                <span>${date}</span>
+                                <span>•</span>
+                                <span>${post.author}</span>
+                            </div>
+                            <h2 class="post-title">${escapeHtml(post.title)}</h2>
+                            <p class="post-excerpt">${escapeHtml(excerpt)}</p>
+                            ${post.tags && post.tags.length > 0 ? `
+                                <div class="post-tags">
+                                    ${post.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewPost(slug) {
+            window.location.href = `/blog/${slug}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadPosts();
+    </script>
 </body>
 </html>
-

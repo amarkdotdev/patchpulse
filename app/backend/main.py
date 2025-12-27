@@ -18,7 +18,8 @@ from starlette.responses import Response
 
 from models import (
     ChangeEvent, ClusterSignal, Decision, DecisionResponse, GuardrailResult,
-    ChangeEventDB, ClusterSignalDB, DecisionDB
+    ChangeEventDB, ClusterSignalDB, DecisionDB,
+    BlogPost, BlogPostDB, BlogPostCreate, BlogPostUpdate
 )
 from database import init_db, get_db
 from policy_engine import evaluate_policy

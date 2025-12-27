@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .api-endpoint {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .method {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .method.get {
+            background: #34C759;
+            color: white;
+        }
+
+        .method.post {
+            background: var(--primary);
+            color: white;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+        }
+
+        .endpoint-description {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin-top: 60px;
+            padding: 40px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+        }
+
+        .cta-btn {
+            background: var(--primary);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>API Documentation</h1>
+            <p style="font-size: 20px; color: var(--text-secondary);">Integrate PatchPulse into your workflow</p>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v1/change-events</span>
+            </div>
+            <div class="endpoint-description">
+                Create a change event and trigger risk analysis. Returns a decision with risk score and guardrail results.
+            </div>
+            <div class="code-block">
+{
+  "source": "github",
+  "repo": "org/repo",
+  "sha": "abc123",
+  "pr_number": 42,
+  "branch": "feature-branch",
+  "files": ["k8s/deployment.yaml"],
+  "diff_hunks": [...],
+  "timestamp": "2026-01-01T00:00:00Z"
+}
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/decisions</span>
+            </div>
+            <div class="endpoint-description">
+                List recent decisions with risk scores and guardrail results. Supports filtering and pagination.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/analytics/summary</span>
+            </div>
+            <div class="endpoint-description">
+                Get analytics summary including total decisions, blocked count, average risk score, and top guardrails.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/analytics/risk-trend</span>
+            </div>
+            <div class="endpoint-description">
+                Get risk score trends over time. Useful for tracking risk patterns and improvements.
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2>Interactive API Docs</h2>
+            <p style="color: var(--text-secondary); margin-top: 12px;">
+                Explore the full API with interactive documentation, try endpoints, and see responses.
+            </p>
+            <a href="http://localhost:8000/docs" class="cta-btn">Open Interactive API Docs →</a>
+        </div>
+    </div>
+</body>
+</html>
+

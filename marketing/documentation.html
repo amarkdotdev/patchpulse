@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .doc-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .doc-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .doc-card h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .doc-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .doc-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Documentation</h1>
+            <p style="font-size: 20px; color: var(--text-secondary);">Everything you need to get started</p>
+        </div>
+
+        <div class="docs-grid">
+            <a href="docs/quickstart.html" class="doc-card">
+                <div class="doc-icon">🚀</div>
+                <h3>Quick Start</h3>
+                <p>Get up and running in 10 minutes. Deploy PatchPulse to your cluster and start analyzing changes.</p>
+            </a>
+
+            <a href="docs/architecture.html" class="doc-card">
+                <div class="doc-icon">🏗️</div>
+                <h3>Architecture</h3>
+                <p>Understand how PatchPulse works under the hood. Learn about components, data flow, and integrations.</p>
+            </a>
+
+            <a href="docs/demo.html" class="doc-card">
+                <div class="doc-icon">🎮</div>
+                <h3>Demo Walkthrough</h3>
+                <p>Step-by-step guide to running the demo scenario. See PatchPulse in action with real examples.</p>
+            </a>
+
+            <a href="docs/runbooks.html" class="doc-card">
+                <div class="doc-icon">📖</div>
+                <h3>Runbooks</h3>
+                <p>Common operational tasks and troubleshooting guides. Everything you need to operate PatchPulse.</p>
+            </a>
+
+            <a href="docs/security.html" class="doc-card">
+                <div class="doc-icon">🔒</div>
+                <h3>Security</h3>
+                <p>Threat model, security best practices, and how PatchPulse keeps your infrastructure secure.</p>
+            </a>
+
+            <a href="api.html" class="doc-card">
+                <div class="doc-icon">🔌</div>
+                <h3>API Reference</h3>
+                <p>Complete API documentation with examples. Integrate PatchPulse into your CI/CD pipeline.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

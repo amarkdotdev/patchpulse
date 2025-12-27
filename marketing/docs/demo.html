@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Walkthrough - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .demo-step {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .demo-step h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../documentation.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="header">
+            <h1>Demo Walkthrough</h1>
+            <p style="font-size: 20px; color: var(--text-secondary);">See PatchPulse in action</p>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 1: Create a Risky Change</h3>
+            <p style="color: var(--text-secondary);">
+                Create a pull request that removes resource limits from a production deployment. This is a common 
+                mistake that can lead to resource exhaustion and cluster instability.
+            </p>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 2: PatchPulse Detects the Change</h3>
+            <p style="color: var(--text-secondary);">
+                The Git integration automatically detects the PR and extracts the diff. The change is sent to the 
+                backend for analysis.
+            </p>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 3: AI Analysis Runs</h3>
+            <p style="color: var(--text-secondary);">
+                PatchPulse analyzes the change using both rule-based guardrails and AI-powered analysis. It identifies:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Missing resource limits (guardrail triggered)</li>
+                <li>Security vulnerabilities (AI scan)</li>
+                <li>Cost optimization opportunities (AI analysis)</li>
+                <li>Incident prediction based on patterns (AI)</li>
+            </ul>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 4: Risk Score Generated</h3>
+            <p style="color: var(--text-secondary);">
+                A risk score is calculated (e.g., 85/100) based on:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Guardrail severities (60% weight)</li>
+                <li>AI risk assessment (40% weight)</li>
+                <li>Cluster context (current resource usage)</li>
+            </ul>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 5: Decision Made</h3>
+            <p style="color: var(--text-secondary);">
+                In advisory mode, the change is logged with a detailed explanation. In enforce mode, high-risk 
+                changes (score ≥ 70) are blocked automatically.
+            </p>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 6: Notification Sent</h3>
+            <p style="color: var(--text-secondary);">
+                A Slack notification is sent with:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Risk score and summary</li>
+                <li>Triggered guardrails with evidence</li>
+                <li>AI recommendations</li>
+                <li>Interactive approve/deny buttons</li>
+            </ul>
+        </div>
+
+        <div class="demo-step">
+            <h3>Step 7: View in Dashboard</h3>
+            <p style="color: var(--text-secondary);">
+                All decisions are visible in the dashboard with full details, AI insights, and historical trends. 
+                You can search, filter, and export decision data.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

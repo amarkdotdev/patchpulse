@@ -57,6 +57,7 @@
             top: 0;
             z-index: 100;
             padding: 20px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .header-content {
@@ -143,7 +144,7 @@
         /* Stats */
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             margin-bottom: 60px;
         }
@@ -476,6 +477,126 @@
             opacity: 0.5;
         }
 
+        /* Search Bar */
+        .search-container {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 48px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            font-size: 20px;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .chart-bar {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: var(--gradient-3);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -22px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid var(--bg-primary);
+        }
+
+        /* Export Button */
+        .export-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--primary);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 { font-size: 36px; }
@@ -489,7 +610,7 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <a href="/ui" class="logo">
+                <a href="/dashboard" class="logo">
                     <div class="logo-icon">P</div>
                     <span>PatchPulse</span>
                 </a>
@@ -532,11 +653,24 @@
             <div class="decisions-section">
                 <div class="section-header">
                     <h2 class="section-title">Recent Decisions</h2>
-                    <div class="filter-tabs">
-                        <button class="filter-tab active" data-filter="all">All</button>
-                        <button class="filter-tab" data-filter="high">High Risk</button>
-                        <button class="filter-tab" data-filter="blocked">Blocked</button>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all">All</button>
+                            <button class="filter-tab" data-filter="high">High Risk</button>
+                            <button class="filter-tab" data-filter="blocked">Blocked</button>
+                        </div>
+                        <button class="export-btn" onclick="exportData()">Export</button>
                     </div>
+                </div>
+
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search decisions, repos, or reasons...">
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Risk Score Distribution</div>
+                    <div id="riskChart"></div>
                 </div>
 
                 <div id="error-container"></div>
@@ -558,9 +692,10 @@
     </div>
 
     <script>
-        const API_BASE = window.location.origin.replace('/ui', '');
+        const API_BASE = window.location.origin.replace('/dashboard', '');
         let allDecisions = [];
         let currentFilter = 'all';
+        let searchQuery = '';
 
         // Fetch decisions
         async function fetchDecisions() {
@@ -572,6 +707,19 @@
                 renderDecisions();
             } catch (error) {
                 showError(`Failed to load decisions: ${error.message}`);
+            }
+        }
+
+        // Fetch analytics
+        async function fetchAnalytics() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/analytics/summary`);
+                if (response.ok) {
+                    const analytics = await response.json();
+                    document.getElementById('incidents-prevented').textContent = analytics.blocked_count || 0;
+                }
+            } catch (error) {
+                console.error('Failed to fetch analytics:', error);
             }
         }
 
@@ -588,6 +736,12 @@
             document.getElementById('high-risk').textContent = highRisk;
             document.getElementById('blocked').textContent = blocked;
             document.getElementById('avg-risk').textContent = avgRisk || '-';
+
+            // Render chart
+            renderRiskChart();
+            
+            // Fetch analytics
+            fetchAnalytics();
         }
 
         // Get risk class
@@ -614,6 +768,51 @@
             return date.toLocaleDateString();
         }
 
+        // Render risk chart
+        function renderRiskChart() {
+            const chartContainer = document.getElementById('riskChart');
+            const ranges = [
+                { label: 'Low (0-30)', min: 0, max: 30, color: 'var(--success)' },
+                { label: 'Medium (31-60)', min: 31, max: 60, color: 'var(--warning)' },
+                { label: 'High (61-80)', min: 61, max: 80, color: 'var(--danger)' },
+                { label: 'Critical (81-100)', min: 81, max: 100, color: '#dc2626' }
+            ];
+
+            const counts = ranges.map(range => {
+                return allDecisions.filter(d => d.risk_score >= range.min && d.risk_score <= range.max).length;
+            });
+
+            const maxCount = Math.max(...counts, 1);
+
+            chartContainer.innerHTML = ranges.map((range, i) => {
+                const count = counts[i];
+                const percentage = (count / allDecisions.length) * 100 || 0;
+                return `
+                    <div>
+                        <div class="chart-label">
+                            <span>${range.label}</span>
+                            <span>${count} (${percentage.toFixed(1)}%)</span>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-bar-fill" style="width: ${(count / maxCount) * 100}%; background: ${range.color};"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Export data
+        function exportData() {
+            const data = JSON.stringify(allDecisions, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `patchpulse-decisions-${new Date().toISOString()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         // Render decisions
         function renderDecisions() {
             const container = document.getElementById('decisions-container');
@@ -624,6 +823,16 @@
                 decisions = decisions.filter(d => d.risk_score >= 60);
             } else if (currentFilter === 'blocked') {
                 decisions = decisions.filter(d => !d.allowed);
+            }
+
+            // Apply search
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                decisions = decisions.filter(d => {
+                    return d.id.toLowerCase().includes(query) ||
+                           d.reasons.some(r => r.toLowerCase().includes(query)) ||
+                           (d.change_event_id && d.change_event_id.toLowerCase().includes(query));
+                });
             }
 
             if (decisions.length === 0) {
@@ -720,6 +929,62 @@
                     `).join('')}
                 </div>
 
+                ${decision.outputs && decision.outputs.ai_features ? `
+                    <div class="detail-section">
+                        <h3>🤖 AI-Powered Insights</h3>
+                        ${decision.outputs.ai_features.security_scan ? `
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="font-size: 18px; margin-bottom: 12px;">🔒 Security Scan</h4>
+                                <p style="color: var(--text-secondary); margin-bottom: 8px;">
+                                    <strong>Severity:</strong> ${decision.outputs.ai_features.security_scan.severity || 'none'}
+                                </p>
+                                ${decision.outputs.ai_features.security_scan.vulnerabilities && decision.outputs.ai_features.security_scan.vulnerabilities.length > 0 ? `
+                                    <ul style="list-style: none; padding: 0;">
+                                        ${decision.outputs.ai_features.security_scan.vulnerabilities.slice(0, 5).map(v => `
+                                            <li style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 8px;">
+                                                <strong>${v.type || 'Unknown'}</strong> (${v.severity || 'unknown'})<br>
+                                                <span style="color: var(--text-secondary); font-size: 14px;">${v.description || ''}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                ` : '<p style="color: var(--text-secondary);">No vulnerabilities detected</p>'}
+                            </div>
+                        ` : ''}
+                        ${decision.outputs.ai_features.recommendations ? `
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="font-size: 18px; margin-bottom: 12px;">💡 Recommendations</h4>
+                                ${decision.outputs.ai_features.recommendations.recommendations && decision.outputs.ai_features.recommendations.recommendations.length > 0 ? `
+                                    <ul style="list-style: none; padding: 0;">
+                                        ${decision.outputs.ai_features.recommendations.recommendations.slice(0, 5).map(r => `
+                                            <li style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 8px;">
+                                                <strong>${r.title || 'Recommendation'}</strong> (${r.priority || 'medium'})<br>
+                                                <span style="color: var(--text-secondary); font-size: 14px;">${r.description || ''}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        ${decision.outputs.ai_features.incident_prediction ? `
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="font-size: 18px; margin-bottom: 12px;">📊 Incident Prediction</h4>
+                                <p style="color: var(--text-secondary);">
+                                    <strong>Probability:</strong> ${(decision.outputs.ai_features.incident_prediction.incident_probability * 100).toFixed(1)}%<br>
+                                    <strong>Time to Incident:</strong> ${decision.outputs.ai_features.incident_prediction.time_to_incident || 'unknown'}<br>
+                                    <strong>Confidence:</strong> ${(decision.outputs.ai_features.incident_prediction.confidence * 100).toFixed(1)}%
+                                </p>
+                            </div>
+                        ` : ''}
+                        ${decision.outputs.ai_features.cost_optimization ? `
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="font-size: 18px; margin-bottom: 12px;">💰 Cost Optimization</h4>
+                                <p style="color: var(--text-secondary); margin-bottom: 8px;">
+                                    <strong>Estimated Savings:</strong> ${decision.outputs.ai_features.cost_optimization.estimated_savings || '$0'}
+                                </p>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
                 ${changeEvent ? `
                     <div class="detail-section">
                         <h3>Change Event</h3>
@@ -754,6 +1019,12 @@
             });
         });
 
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderDecisions();
+        });
+
         // Close modal on outside click
         document.getElementById('detail-modal').addEventListener('click', (e) => {
             if (e.target.id === 'detail-modal') closeModal();
@@ -765,9 +1036,35 @@
             container.innerHTML = `<div class="error">${message}</div>`;
         }
 
+        // WebSocket for real-time updates
+        let ws = null;
+        function connectWebSocket() {
+            const wsUrl = API_BASE.replace('http://', 'ws://').replace('https://', 'wss://') + '/ws';
+            ws = new WebSocket(wsUrl);
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'new_decision') {
+                    // Refresh decisions when new one arrives
+                    fetchDecisions();
+                }
+            };
+            
+            ws.onerror = () => {
+                // Fallback to polling if WebSocket fails
+                console.log('WebSocket error, falling back to polling');
+            };
+            
+            ws.onclose = () => {
+                // Reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+
         // Initial load
         fetchDecisions();
-        setInterval(fetchDecisions, 30000); // Refresh every 30s
+        connectWebSocket();
+        setInterval(fetchDecisions, 30000); // Fallback polling every 30s
     </script>
 </body>
 </html>

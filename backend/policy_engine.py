@@ -1,8 +1,19 @@
 """Policy engine with guardrail registry."""
 
 import re
+import logging
 from typing import List, Dict, Any, Optional
 from models import ChangeEvent, ClusterSignal, GuardrailResult
+
+logger = logging.getLogger(__name__)
+
+# Try to import AI analyzer (optional)
+try:
+    from ai_analyzer import analyze_change_with_ai, explain_guardrail_with_ai
+    AI_AVAILABLE = True
+except ImportError:
+    logger.warning("AI analyzer not available, running in rule-based mode only")
+    AI_AVAILABLE = False
 
 # Critical namespaces that get risk modifiers
 CRITICAL_NAMESPACES = ["kube-system", "production", "prod"]
@@ -186,10 +197,143 @@ def check_image_tag_latest(change_event: ChangeEvent, cluster_signals: List[Clus
     return None
 
 
+@registry.register
+def check_security_context_privileged(change_event: ChangeEvent, cluster_signals: List[ClusterSignal]) -> Optional[GuardrailResult]:
+    """Check for privileged security context."""
+    for hunk in change_event.diff_hunks:
+        hunk_text = hunk.get("hunk", "")
+        file_path = hunk.get("file", "")
+        
+        if re.search(r'privileged:\s*true', hunk_text, re.IGNORECASE):
+            return GuardrailResult(
+                id="privileged_security_context",
+                severity=70,
+                message="Container running with privileged security context",
+                evidence=[f"File: {file_path}"]
+            )
+    
+    return None
+
+
+@registry.register
+def check_host_network(change_event: ChangeEvent, cluster_signals: List[ClusterSignal]) -> Optional[GuardrailResult]:
+    """Check for hostNetwork usage."""
+    for hunk in change_event.diff_hunks:
+        hunk_text = hunk.get("hunk", "")
+        file_path = hunk.get("file", "")
+        
+        if re.search(r'hostNetwork:\s*true', hunk_text, re.IGNORECASE):
+            return GuardrailResult(
+                id="host_network",
+                severity=60,
+                message="Pod using hostNetwork (security risk)",
+                evidence=[f"File: {file_path}"]
+            )
+    
+    return None
+
+
+@registry.register
+def check_missing_readiness_probe(change_event: ChangeEvent, cluster_signals: List[ClusterSignal]) -> Optional[GuardrailResult]:
+    """Check for missing readiness probe."""
+    for hunk in change_event.diff_hunks:
+        hunk_text = hunk.get("hunk", "")
+        file_path = hunk.get("file", "")
+        
+        # Check if readinessProbe is removed
+        if re.search(r'-\s*readinessProbe:', hunk_text):
+            return GuardrailResult(
+                id="missing_readiness_probe",
+                severity=30,
+                message="Readiness probe removed or missing",
+                evidence=[f"File: {file_path}"]
+            )
+    
+    return None
+
+
+@registry.register
+def check_low_replica_count(change_event: ChangeEvent, cluster_signals: List[ClusterSignal]) -> Optional[GuardrailResult]:
+    """Check for low replica count in production."""
+    for hunk in change_event.diff_hunks:
+        hunk_text = hunk.get("hunk", "")
+        file_path = hunk.get("file", "")
+        
+        # Check for replicas: 1 in production namespace
+        if "production" in file_path.lower() or "prod" in file_path.lower():
+            if re.search(r'replicas:\s*1\b', hunk_text):
+                return GuardrailResult(
+                    id="low_replica_count",
+                    severity=40,
+                    message="Single replica in production namespace (no redundancy)",
+                    evidence=[f"File: {file_path}"]
+                )
+    
+    return None
+
+
 def evaluate_policy(change_event: ChangeEvent, cluster_signals: List[ClusterSignal], mode: str = "advisory") -> Dict[str, Any]:
-    """Evaluate policy and return decision."""
+    """Evaluate policy with AI analysis and return decision."""
     guardrail_results = registry.evaluate_all(change_event, cluster_signals)
-    risk_score = calculate_risk_score(guardrail_results, change_event)
+    rule_based_score = calculate_risk_score(guardrail_results, change_event)
+    
+    # Get AI analysis if available
+    ai_result = None
+    if AI_AVAILABLE:
+        try:
+            cluster_signals_dict = [
+                {
+                    "kind": s.kind,
+                    "name": s.name,
+                    "metric": s.metric,
+                    "value": s.value,
+                    "signal_metadata": getattr(s, 'signal_metadata', getattr(s, 'metadata', {}))
+                }
+                for s in cluster_signals
+            ]
+            
+            ai_result = analyze_change_with_ai(
+                diff_hunks=change_event.diff_hunks,
+                files=change_event.files,
+                cluster_signals=cluster_signals_dict,
+                repo=change_event.repo,
+                branch=change_event.branch or "unknown"
+            )
+            
+            # Enhance guardrail messages with AI explanations
+            if ai_result and ai_result.get("confidence", 0) > 0.5:
+                diff_context = "\n".join([
+                    f"File: {h.get('file', '')}\n{h.get('hunk', '')}"
+                    for h in change_event.diff_hunks[:3]
+                ])
+                
+                for gr in guardrail_results:
+                    if gr.evidence:
+                        try:
+                            enhanced = explain_guardrail_with_ai(
+                                guardrail_id=gr.id,
+                                guardrail_message=gr.message,
+                                evidence=gr.evidence,
+                                diff_context=diff_context
+                            )
+                            gr.message = enhanced
+                        except Exception as e:
+                            logger.warning(f"Failed to enhance guardrail {gr.id} with AI: {e}")
+            
+        except Exception as e:
+            logger.error(f"AI analysis failed: {e}", exc_info=True)
+    
+    # Combine rule-based and AI scores
+    if ai_result and ai_result.get("confidence", 0) > 0.3:
+        ai_score = ai_result.get("risk_score", 0)
+        confidence = ai_result.get("confidence", 0)
+        # Weighted combination: 60% rule-based, 40% AI (if AI confidence is high)
+        risk_score = int(rule_based_score * 0.6 + ai_score * 0.4 * confidence)
+        # If AI finds issues not caught by rules, increase score
+        if ai_score > rule_based_score + 10:
+            risk_score = max(risk_score, ai_score - 5)
+    else:
+        risk_score = rule_based_score
     
     # Determine if change should be allowed
     # In advisory mode, always allow but log
@@ -198,13 +342,23 @@ def evaluate_policy(change_event: ChangeEvent, cluster_signals: List[ClusterSign
     if mode == "enforce" and risk_score > 70:
         allowed = False
     
-    reasons = [gr.message for gr in guardrail_results[:5]]  # Top 5 reasons
+    # Build reasons list (combine guardrails and AI insights)
+    reasons = [gr.message for gr in guardrail_results[:3]]  # Top 3 guardrails
+    
+    if ai_result and ai_result.get("potential_issues"):
+        # Add top AI-identified issues
+        for issue in ai_result["potential_issues"][:2]:
+            if issue not in reasons:
+                reasons.append(f"AI: {issue}")
+    
+    if not reasons:
+        reasons = ["No issues detected"]
     
     evidence_refs = []
     for gr in guardrail_results:
         evidence_refs.extend(gr.evidence)
     
-    return {
+    result = {
         "risk_score": risk_score,
         "reasons": reasons,
         "guardrails_triggered": guardrail_results,
@@ -212,4 +366,16 @@ def evaluate_policy(change_event: ChangeEvent, cluster_signals: List[ClusterSign
         "allowed": allowed,
         "evidence_refs": list(set(evidence_refs))  # Deduplicate
     }
+    
+    # Add AI analysis if available
+    if ai_result:
+        result["ai_analysis"] = {
+            "risk_score": ai_result.get("risk_score", 0),
+            "analysis": ai_result.get("ai_analysis", ""),
+            "recommendations": ai_result.get("recommendations", []),
+            "potential_issues": ai_result.get("potential_issues", []),
+            "confidence": ai_result.get("confidence", 0.0)
+        }
+    
+    return result
 

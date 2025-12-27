@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .content-section {
+            margin-bottom: 60px;
+        }
+
+        .content-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .content-section p {
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .team-member {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .team-member h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .team-member p {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>About PatchPulse</h1>
+            <p style="font-size: 20px; color: var(--text-secondary);">Preventing incidents before they happen</p>
+            <p style="font-size: 16px; color: var(--text-tertiary); margin-top: 12px;">📍 Based in Tel Aviv, Israel</p>
+        </div>
+
+        <div class="content-section">
+            <h2>Our Mission</h2>
+            <p>
+                PatchPulse was born from a simple observation: most production incidents are preventable. 
+                We saw teams struggling with the same problems—risky deployments, missing guardrails, 
+                and lack of visibility into change impact.
+            </p>
+            <p>
+                Our mission is to give every engineering team the power to ship with confidence, 
+                preventing incidents before they reach production through AI-powered pre-flight analysis.
+            </p>
+        </div>
+
+        <div class="content-section">
+            <h2>What We Do</h2>
+            <p>
+                PatchPulse analyzes your Kubernetes deployment changes before they reach production. 
+                We combine Git diff analysis with real-time cluster intelligence to provide explainable 
+                risk scores and enforce guardrails that actually make sense.
+            </p>
+            <p>
+                Unlike traditional policy engines, PatchPulse provides context-aware analysis. 
+                We don't just check rules—we understand your infrastructure and provide actionable 
+                insights with concrete evidence.
+            </p>
+        </div>
+
+        <div class="content-section">
+            <h2>Our Values</h2>
+            <p>
+                <strong>Transparency:</strong> Every decision comes with explainable evidence. No black boxes.
+            </p>
+            <p>
+                <strong>Developer Experience:</strong> We build tools that developers actually want to use.
+            </p>
+            <p>
+                <strong>Security by Default:</strong> Least privilege, audit logs, and secure defaults.
+            </p>
+            <p>
+                <strong>Continuous Improvement:</strong> We learn from every incident prevented.
+            </p>
+        </div>
+
+        <div class="content-section">
+            <h2>The Team</h2>
+            <p>
+                We're a team of engineers who've been on-call at 3 AM. We've seen the pain of preventable 
+                incidents and built PatchPulse to solve it.
+            </p>
+            <div class="team-grid">
+                <div class="team-member">
+                    <h3>Engineering Team</h3>
+                    <p>Building the future of SRE</p>
+                </div>
+                <div class="team-member">
+                    <h3>Product Team</h3>
+                    <p>Making complex simple</p>
+                </div>
+                <div class="team-member">
+                    <h3>Customer Success</h3>
+                    <p>Your success is our mission</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

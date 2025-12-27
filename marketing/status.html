@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .status-overview {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .status-indicator {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+
+        .status-text {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .status-description {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        .service-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .service-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .service-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-badge.operational {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-badge.degraded {
+            background: var(--warning);
+            color: white;
+        }
+
+        .status-badge.down {
+            background: var(--danger);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>System Status</h1>
+            <p style="font-size: 20px; color: var(--text-secondary);">Real-time status of PatchPulse services</p>
+        </div>
+
+        <div class="status-overview">
+            <div class="status-indicator">✅</div>
+            <div class="status-text" style="color: var(--success);">All Systems Operational</div>
+            <div class="status-description">All services are running normally</div>
+        </div>
+
+        <div class="service-list">
+            <div class="service-item">
+                <div class="service-name">API Service</div>
+                <div class="service-status">
+                    <span class="status-badge operational">Operational</span>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-name">Dashboard</div>
+                <div class="service-status">
+                    <span class="status-badge operational">Operational</span>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-name">Kubernetes Agent</div>
+                <div class="service-status">
+                    <span class="status-badge operational">Operational</span>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-name">GitHub Integration</div>
+                <div class="service-status">
+                    <span class="status-badge operational">Operational</span>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-name">GitLab Integration</div>
+                <div class="service-status">
+                    <span class="status-badge operational">Operational</span>
+                </div>
+            </div>
+
+            <div class="service-item">
+                <div class="service-name">Slack Integration</div>
+                <div class="service-status">
+                    <span class="status-badge operational">Operational</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; color: var(--text-tertiary);">
+            <p>Last updated: <span id="last-updated"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('last-updated').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>
+

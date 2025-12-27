@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+
+        .security-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .security-section h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../documentation.html" class="back-link">← Back to Documentation</a>
+        
+        <div class="header">
+            <h1>Security</h1>
+            <p style="font-size: 20px; color: var(--text-secondary);">How PatchPulse keeps your infrastructure secure</p>
+        </div>
+
+        <div class="security-section">
+            <h3>API Key Protection</h3>
+            <p style="color: var(--text-secondary);">
+                All API keys are stored securely and never exposed:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Keys stored only in Kubernetes secrets</li>
+                <li>Never logged or exposed in responses</li>
+                <li>Automatic sanitization in all outputs</li>
+                <li>Response validation before transmission</li>
+            </ul>
+        </div>
+
+        <div class="security-section">
+            <h3>Least Privilege Access</h3>
+            <p style="color: var(--text-secondary);">
+                All components follow least-privilege principles:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Agent uses read-only Kubernetes API access</li>
+                <li>Minimal RBAC permissions</li>
+                <li>No write access to cluster resources</li>
+                <li>Network policies restrict communication</li>
+            </ul>
+        </div>
+
+        <div class="security-section">
+            <h3>Data Protection</h3>
+            <p style="color: var(--text-secondary);">
+                Sensitive data is protected at rest and in transit:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Encrypted database connections</li>
+                <li>TLS for all API communications</li>
+                <li>Secrets encrypted in Kubernetes</li>
+                <li>Audit logging for all decisions</li>
+            </ul>
+        </div>
+
+        <div class="security-section">
+            <h3>Threat Model</h3>
+            <p style="color: var(--text-secondary);">
+                PatchPulse is designed to mitigate common threats:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Unauthorized access: RBAC and network policies</li>
+                <li>Data leakage: Comprehensive sanitization</li>
+                <li>API abuse: Rate limiting and validation</li>
+                <li>Supply chain: Signed container images</li>
+            </ul>
+        </div>
+
+        <div class="security-section">
+            <h3>Security Best Practices</h3>
+            <p style="color: var(--text-secondary);">
+                Recommendations for secure deployment:
+            </p>
+            <ul style="margin-top: 12px; color: var(--text-secondary); padding-left: 24px;">
+                <li>Use dedicated service accounts</li>
+                <li>Enable Pod Security Standards</li>
+                <li>Regular security updates</li>
+                <li>Monitor audit logs</li>
+                <li>Rotate API keys regularly</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+

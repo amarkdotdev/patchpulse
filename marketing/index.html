@@ -292,6 +292,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 8px;
+            transition: transform 0.3s;
+        }
+
+        .hero-stat:hover .hero-stat-value {
+            transform: scale(1.1);
         }
 
         .hero-stat-label {
@@ -388,9 +393,9 @@
         }
 
         .feature-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-8px) scale(1.02);
             border-color: var(--primary);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 122, 255, 0.2);
         }
 
         .feature-card:hover::before {
@@ -687,16 +692,148 @@
             .nav-links { display: none; }
         }
 
-        /* Animations */
+        /* Advanced Animations */
         .fade-in {
             opacity: 0;
             transform: translateY(30px);
-            transition: all 0.6s;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .fade-in.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* Parallax effects */
+        .parallax {
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Glow effect */
+        .glow {
+            position: relative;
+        }
+
+        .glow::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 122, 255, 0.3) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .glow:hover::before {
+            opacity: 1;
+        }
+
+        /* Particle background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: particle-float 20s infinite;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Scroll progress indicator */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--gradient-3);
+            z-index: 9999;
+            transform-origin: left;
+            transition: transform 0.1s;
+        }
+
+        /* Typing animation */
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--primary);
+            animation: typing 3s steps(40) infinite, blink 0.75s step-end infinite;
+        }
+
+        @keyframes blink {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--primary); }
+        }
+
+        /* 3D card effect */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.3s;
+        }
+
+        .card-3d:hover {
+            transform: rotateY(5deg) rotateX(5deg);
+        }
+
+        /* Gradient text animation */
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .gradient-animated {
+            background: linear-gradient(-45deg, #007AFF, #5AC8FA, #764ba2, #667eea);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 5s ease infinite;
         }
     </style>
 </head>
@@ -712,8 +849,8 @@
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#how-it-works" class="nav-link">How It Works</a>
                 <a href="#pricing" class="nav-link">Pricing</a>
-                <a href="#demo" class="nav-link">Demo</a>
-                <a href="/ui" class="nav-cta">Dashboard</a>
+                <a href="/dashboard" class="nav-link">Demo</a>
+                <a href="login.html" class="nav-cta">Log In</a>
             </div>
         </div>
     </nav>
@@ -725,15 +862,15 @@
             <div class="hero-badge">🚀 Trusted by Leading DevOps Teams</div>
             <h1>Prevent Incidents<br>Before They Happen</h1>
             <p class="hero-subtitle">
-                AI-powered pre-flight risk analysis for Kubernetes. Stop production incidents before they reach your cluster with explainable guardrails and real-time cluster intelligence.
+                AI-powered pre-flight risk analysis for Kubernetes. Stop production incidents before they happen with intelligent guardrails, security scanning, and real-time recommendations.
             </p>
             <div class="hero-cta">
-                <a href="#demo" class="btn-primary">
-                    Watch Demo
+                <a href="/dashboard" class="btn-primary">
+                    Try Demo Dashboard
                     <span>▶</span>
                 </a>
-                <a href="/ui" class="btn-secondary">
-                    Try Dashboard
+                <a href="/dashboard" class="btn-secondary">
+                    Log In
                 </a>
             </div>
             <div class="hero-stats">
@@ -760,50 +897,36 @@
                 <div class="section-badge">Powerful Features</div>
                 <h2 class="section-title">Everything You Need to Ship Safely</h2>
                 <p class="section-subtitle">
-                    Comprehensive risk analysis with explainable AI and real-time cluster intelligence
+                    AI-powered guardrails, real-time monitoring, and intelligent recommendations in one platform
                 </p>
             </div>
-            <div class="features-grid">
+            <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🛡️</div>
-                    <h3 class="feature-title">Pre-Flight Guardrails</h3>
+                    <h3 class="feature-title">AI-Powered Guardrails</h3>
                     <p class="feature-description">
-                        Block risky changes before they reach production. Our AI analyzes every PR/MR and enforces policies automatically with explainable decisions.
+                        Block risky changes before production. AI analyzes every PR/MR with 11+ guardrails, security scanning, and explainable decisions backed by concrete evidence.
                     </p>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🧠</div>
-                    <h3 class="feature-title">Explainable AI</h3>
+                    <h3 class="feature-title">Intelligent Risk Analysis</h3>
                     <p class="feature-description">
-                        Every decision comes with concrete evidence. See exactly which diff hunks and cluster signals triggered each guardrail with full traceability.
+                        Hybrid AI + rule-based scoring provides accurate risk assessment. Get AI recommendations, incident predictions, and cost optimization suggestions with every change.
                     </p>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="feature-icon">⚡</div>
-                    <h3 class="feature-title">Real-Time Analysis</h3>
+                    <h3 class="feature-title">Real-Time Monitoring</h3>
                     <p class="feature-description">
-                        Get instant risk scores as changes are proposed. Our lightweight agent continuously monitors your cluster and provides real-time intelligence.
+                        Lightweight Kubernetes agent provides real-time cluster intelligence. WebSocket updates deliver instant notifications as decisions are made.
                     </p>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="feature-icon">🔗</div>
-                    <h3 class="feature-title">Git Integration</h3>
+                    <h3 class="feature-title">Seamless Integrations</h3>
                     <p class="feature-description">
-                        Seamlessly integrates with GitHub and GitLab. Automatically analyzes PRs/MRs and provides risk feedback directly in your workflow.
-                    </p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">📊</div>
-                    <h3 class="feature-title">Risk Scoring</h3>
-                    <p class="feature-description">
-                        Deterministic 0-100 risk scores based on weighted guardrails and cluster context. Know exactly how risky each change is before merging.
-                    </p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🔔</div>
-                    <h3 class="feature-title">Smart Notifications</h3>
-                    <p class="feature-description">
-                        Get notified in Slack with interactive approval buttons. See risk summaries, evidence, and recommended actions at a glance.
+                        Native GitHub & GitLab integration with Slack notifications. Interactive approval workflows and comprehensive API for CI/CD pipelines.
                     </p>
                 </div>
             </div>
@@ -817,7 +940,7 @@
                 <div class="section-badge">Simple Process</div>
                 <h2 class="section-title">How PatchPulse Works</h2>
                 <p class="section-subtitle">
-                    From code change to risk decision in seconds
+                    See how PatchPulse analyzes changes, runs AI analysis, and makes decisions in real-time
                 </p>
             </div>
             <div class="demo-container">
@@ -828,14 +951,18 @@
                         <div class="code-line"><span class="code-keyword">git</span> commit -m <span class="code-string">"Remove resource limits"</span></div>
                         <div class="code-line"><span class="code-keyword">git</span> push origin remove-limits</div>
                         <div class="code-line"><br></div>
-                        <div class="code-line"><span class="code-comment"># 2. PatchPulse analyzes</span></div>
-                        <div class="code-line">🔍 Analyzing diff...</div>
-                        <div class="code-line">📊 Risk Score: <span class="code-string">85/100</span> 🔴</div>
+                        <div class="code-line"><span class="code-comment"># 2. PatchPulse AI Analysis</span></div>
+                        <div class="code-line">🔍 Analyzing diff + cluster state...</div>
+                        <div class="code-line">🤖 AI Risk Score: <span class="code-string">85/100</span> 🔴</div>
                         <div class="code-line">🛡️ Guardrails: <span class="code-string">3 triggered</span></div>
+                        <div class="code-line">🔒 Security: <span class="code-string">2 vulnerabilities</span></div>
+                        <div class="code-line">💡 Recommendations: <span class="code-string">5 provided</span></div>
+                        <div class="code-line">📊 Incident Risk: <span class="code-string">High (72%)</span></div>
                         <div class="code-line"><br></div>
-                        <div class="code-line"><span class="code-comment"># 3. Decision made</span></div>
+                        <div class="code-line"><span class="code-comment"># 3. Decision with AI Insights</span></div>
                         <div class="code-line">❌ <span class="code-string">BLOCKED</span> - High risk detected</div>
                         <div class="code-line">📝 Evidence: Resource limits removed</div>
+                        <div class="code-line">💡 Fix: Add CPU/memory limits</div>
                     </div>
                 </div>
                 <div>
@@ -844,22 +971,22 @@
                         <div style="display: flex; gap: 20px; margin-bottom: 30px;">
                             <div style="width: 50px; height: 50px; background: var(--gradient-3); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0;">1</div>
                             <div>
-                                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Detect Changes</h4>
-                                <p style="color: var(--text-secondary);">Our Git integration automatically detects PRs/MRs and extracts diffs</p>
+                                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Detect & Analyze</h4>
+                                <p style="color: var(--text-secondary);">Git integration detects PRs/MRs. AI analyzes diffs, cluster state, and historical patterns to assess risk.</p>
                             </div>
                         </div>
                         <div style="display: flex; gap: 20px; margin-bottom: 30px;">
                             <div style="width: 50px; height: 50px; background: var(--gradient-3); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0;">2</div>
                             <div>
-                                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Analyze Risk</h4>
-                                <p style="color: var(--text-secondary);">AI evaluates changes against guardrails and cluster signals in real-time</p>
+                                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">AI-Powered Insights</h4>
+                                <p style="color: var(--text-secondary);">Get security scans, recommendations, incident predictions, and cost optimization suggestions with every change.</p>
                             </div>
                         </div>
                         <div style="display: flex; gap: 20px;">
                             <div style="width: 50px; height: 50px; background: var(--gradient-3); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0;">3</div>
                             <div>
-                                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Enforce Policy</h4>
-                                <p style="color: var(--text-secondary);">Block or gate risky changes with explainable decisions and evidence</p>
+                                <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Enforce & Notify</h4>
+                                <p style="color: var(--text-secondary);">Block risky changes automatically or log for review. Get Slack notifications with interactive approvals and full explainability.</p>
                             </div>
                         </div>
                     </div>
@@ -889,7 +1016,7 @@
                         <li><span class="check-icon">✓</span> Advisory mode only</li>
                         <li><span class="check-icon">✓</span> Community support</li>
                     </ul>
-                    <a href="/ui" class="btn-secondary" style="width: 100%; text-align: center;">Get Started</a>
+                    <a href="/dashboard" class="btn-secondary" style="width: 100%; text-align: center;">Get Started</a>
                 </div>
                 <div class="pricing-card featured">
                     <div class="pricing-badge">Most Popular</div>
@@ -904,7 +1031,7 @@
                         <li><span class="check-icon">✓</span> Priority support</li>
                         <li><span class="check-icon">✓</span> Custom policies</li>
                     </ul>
-                    <a href="/ui" class="btn-primary" style="width: 100%; text-align: center;">Start Free Trial</a>
+                    <a href="/dashboard" class="btn-primary" style="width: 100%; text-align: center;">Start Free Trial</a>
                 </div>
                 <div class="pricing-card">
                     <div class="pricing-name">Enterprise</div>
@@ -929,7 +1056,7 @@
         <div class="cta-content">
             <h2 class="cta-title">Ready to Prevent Your Next Incident?</h2>
             <p class="cta-subtitle">Join thousands of teams shipping with confidence</p>
-            <a href="/ui" class="btn-white">Start Free Trial →</a>
+            <a href="/dashboard" class="btn-white">Start Free Trial →</a>
         </div>
     </section>
 
@@ -946,26 +1073,26 @@
                 <h4>Product</h4>
                 <a href="#features">Features</a>
                 <a href="#pricing">Pricing</a>
-                <a href="#demo">Demo</a>
-                <a href="/ui">Dashboard</a>
+                <a href="/dashboard">Demo</a>
+                <a href="/dashboard">Dashboard</a>
             </div>
             <div class="footer-links">
                 <h4>Company</h4>
-                <a href="#about">About</a>
-                <a href="#blog">Blog</a>
-                <a href="#careers">Careers</a>
-                <a href="#contact">Contact</a>
+                <a href="about.html">About</a>
+                <a href="blog.html">Blog</a>
+                <a href="careers.html">Careers</a>
+                <a href="contact.html">Contact</a>
             </div>
             <div class="footer-links">
                 <h4>Resources</h4>
-                <a href="#docs">Documentation</a>
-                <a href="#api">API</a>
-                <a href="#support">Support</a>
-                <a href="#status">Status</a>
+                <a href="documentation.html">Documentation</a>
+                <a href="api.html">API</a>
+                <a href="support.html">Support</a>
+                <a href="status.html">Status</a>
             </div>
         </div>
         <div class="footer-bottom">
-            <div>© 2024 PatchPulse. All rights reserved.</div>
+            <div>© 2026 PatchPulse. All rights reserved.</div>
             <div>
                 <a href="#privacy" style="color: var(--text-tertiary); text-decoration: none; margin-right: 20px;">Privacy</a>
                 <a href="#terms" style="color: var(--text-tertiary); text-decoration: none;">Terms</a>
@@ -973,7 +1100,36 @@
         </div>
     </footer>
 
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Particle Background -->
+    <div class="particles" id="particles"></div>
+
     <script>
+        // Create particle background
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Scroll progress indicator
+        function updateScrollProgress() {
+            const scrollProgress = document.getElementById('scrollProgress');
+            const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrolled = (window.scrollY / windowHeight) * 100;
+            scrollProgress.style.transform = `scaleX(${scrolled / 100})`;
+        }
+
         // Navbar scroll effect
         window.addEventListener('scroll', () => {
             const nav = document.getElementById('navbar');
@@ -982,6 +1138,7 @@
             } else {
                 nav.classList.remove('scrolled');
             }
+            updateScrollProgress();
         });
 
         // Fade in animations

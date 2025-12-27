@@ -103,6 +103,13 @@
             background: linear-gradient(135deg, #FF3B30, #FF9500);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            transition: all 0.5s;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .risk-label {

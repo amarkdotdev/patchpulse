@@ -25,6 +25,9 @@ services:
       DATABASE_URL: postgresql://patchpulse:patchpulse@postgres:5432/patchpulse
       POLICY_MODE: advisory
       LOG_LEVEL: INFO
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     depends_on:

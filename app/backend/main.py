@@ -120,9 +120,10 @@ async def serve_marketing(path: str):
     from fastapi.responses import FileResponse
     import os
     
-    # Don't serve API routes, dashboard, or system endpoints
+    # Don't serve API routes or system endpoints
     # Allow "docs/" for website documentation, but block "/docs" (API docs endpoint)
-    if path.startswith("api/") or path.startswith("dashboard") or path in ["health", "metrics", "docs"]:
+    # Note: dashboard is handled by the mount above, so it won't reach here
+    if path.startswith("api/") or path in ["health", "metrics", "docs"]:
         raise HTTPException(status_code=404)
     
     # Try website directory first (in Docker it's /app/website)

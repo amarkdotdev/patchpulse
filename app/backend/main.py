@@ -103,14 +103,23 @@ except Exception as e:
     logger.warning(f"UI directory not found, skipping static file mount: {e}")
 
 
+@app.get("/dashboard")
+async def dashboard_redirect():
+    """Redirect /dashboard to /dashboard/ to ensure StaticFiles mount works."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/dashboard/")
+
+
 @app.get("/")
 async def root():
     """Serve marketing index page at root."""
     from fastapi.responses import FileResponse
     import os
-    index_path = os.path.join("/app/website", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
+    website_paths = ["/app/website", "website", os.path.join(os.getcwd(), "website")]
+    for base_path in website_paths:
+        index_path = os.path.join(base_path, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
     return {"name": "PatchPulse API", "version": "1.0.0"}
 
 

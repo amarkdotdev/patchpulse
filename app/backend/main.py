@@ -202,6 +202,39 @@ async def metrics():
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+@app.post("/api/v1/auth/signup", response_model=User)
+async def signup(user_data: UserSignup, db: Session = Depends(get_db)):
+    """Sign up a new user."""
+    from auth import hash_password
+    
+    # Check if user already exists
+    existing_user = db.query(UserDB).filter(UserDB.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate password
+    if len(user_data.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+    
+    # Create new user
+    password_hash = hash_password(user_data.password)
+    new_user = UserDB(
+        email=user_data.email,
+        password_hash=password_hash,
+        full_name=user_data.full_name,
+        company=user_data.company,
+        plan="free"
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    logger.info(f"New user signed up: {new_user.email}")
+    
+    return User.model_validate(new_user)
+
+
 @app.post("/api/v1/auth/login")
 async def login(request: Request):
     """Login endpoint - authenticates users and returns JWT token."""

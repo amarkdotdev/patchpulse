@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app
+  namespace: production
+  labels:
+    app: test-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+    spec:
+      containers:
+      - name: app
+        image: nginx:latest
+        # Resources removed - this should trigger guardrails!
+        ports:
+        - containerPort: 80
+# HPA removed - this should also trigger guardrails!
+

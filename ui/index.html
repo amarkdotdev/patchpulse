@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatchPulse - Pre-Flight Risk Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --primary-dark: #0051D5;
+            --success: #34C759;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --bg-tertiary: #2C2C2E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --text-tertiary: #8E8E93;
+            --border: #38383A;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --glass: rgba(28, 28, 30, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            background: var(--glass);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 20px 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Decisions List */
+        .decisions-section {
+            margin-bottom: 60px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: 12px;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary);
+        }
+
+        .filter-tab.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .decisions-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .decision-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .decision-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+
+        .decision-card:hover {
+            transform: translateX(4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .decision-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .decision-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .decision-meta {
+            flex: 1;
+        }
+
+        .decision-id {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin-bottom: 8px;
+        }
+
+        .decision-time {
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        .risk-badge {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .risk-low { background: rgba(52, 199, 89, 0.2); color: var(--success); }
+        .risk-medium { background: rgba(255, 149, 0, 0.2); color: var(--warning); }
+        .risk-high { background: rgba(255, 59, 48, 0.2); color: var(--danger); }
+        .risk-critical { background: rgba(255, 59, 48, 0.3); color: var(--danger); border: 1px solid var(--danger); }
+
+        .decision-reasons {
+            margin-top: 16px;
+        }
+
+        .reason-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            font-size: 13px;
+            margin: 4px 4px 4px 0;
+            color: var(--text-secondary);
+        }
+
+        /* Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+            padding: 40px;
+            animation: slideUp 0.3s;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-primary);
+            transform: rotate(90deg);
+        }
+
+        .detail-section {
+            margin-bottom: 32px;
+        }
+
+        .detail-section h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .guardrail-item {
+            background: var(--bg-tertiary);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .guardrail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .guardrail-id {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .guardrail-severity {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .evidence-list {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .evidence-item {
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--danger);
+            margin: 20px 0;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 18px; }
+            .stats { grid-template-columns: 1fr; }
+            .modal-content { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/ui" class="logo">
+                    <div class="logo-icon">P</div>
+                    <span>PatchPulse</span>
+                </a>
+                <div class="header-actions">
+                    <div class="status-badge">
+                        <span class="status-dot"></span>
+                        <span>System Healthy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="hero">
+                <h1>Pre-Flight Risk Analysis</h1>
+                <p>Prevent incidents before they happen. Analyze infrastructure changes and enforce guardrails with explainable AI.</p>
+            </div>
+
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-decisions">-</div>
+                    <div class="stat-label">Total Decisions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="high-risk">-</div>
+                    <div class="stat-label">High Risk</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="blocked">-</div>
+                    <div class="stat-label">Blocked</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-risk">-</div>
+                    <div class="stat-label">Avg Risk Score</div>
+                </div>
+            </div>
+
+            <div class="decisions-section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Decisions</h2>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All</button>
+                        <button class="filter-tab" data-filter="high">High Risk</button>
+                        <button class="filter-tab" data-filter="blocked">Blocked</button>
+                    </div>
+                </div>
+
+                <div id="error-container"></div>
+                <div id="decisions-container">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading decisions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="detail-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin.replace('/ui', '');
+        let allDecisions = [];
+        let currentFilter = 'all';
+
+        // Fetch decisions
+        async function fetchDecisions() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/decisions?limit=50`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                allDecisions = await response.json();
+                updateStats(allDecisions);
+                renderDecisions();
+            } catch (error) {
+                showError(`Failed to load decisions: ${error.message}`);
+            }
+        }
+
+        // Update stats
+        function updateStats(decisions) {
+            const total = decisions.length;
+            const highRisk = decisions.filter(d => d.risk_score >= 60).length;
+            const blocked = decisions.filter(d => !d.allowed).length;
+            const avgRisk = total > 0 
+                ? Math.round(decisions.reduce((sum, d) => sum + d.risk_score, 0) / total)
+                : 0;
+
+            document.getElementById('total-decisions').textContent = total;
+            document.getElementById('high-risk').textContent = highRisk;
+            document.getElementById('blocked').textContent = blocked;
+            document.getElementById('avg-risk').textContent = avgRisk || '-';
+        }
+
+        // Get risk class
+        function getRiskClass(score) {
+            if (score >= 80) return 'risk-critical';
+            if (score >= 60) return 'risk-high';
+            if (score >= 30) return 'risk-medium';
+            return 'risk-low';
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Render decisions
+        function renderDecisions() {
+            const container = document.getElementById('decisions-container');
+            let decisions = allDecisions;
+
+            // Apply filter
+            if (currentFilter === 'high') {
+                decisions = decisions.filter(d => d.risk_score >= 60);
+            } else if (currentFilter === 'blocked') {
+                decisions = decisions.filter(d => !d.allowed);
+            }
+
+            if (decisions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <h3>No decisions found</h3>
+                        <p>Decisions will appear here as changes are analyzed</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = decisions.map(decision => `
+                <div class="decision-card" onclick="showDetail('${decision.id}')">
+                    <div class="decision-header">
+                        <div class="decision-meta">
+                            <div class="decision-id">${decision.id.substring(0, 12)}...</div>
+                            <div class="decision-time">${formatDate(decision.created_at)}</div>
+                        </div>
+                        <div class="risk-badge ${getRiskClass(decision.risk_score)}">
+                            ${decision.risk_score}
+                        </div>
+                    </div>
+                    <div class="decision-reasons">
+                        ${decision.reasons.slice(0, 3).map(r => 
+                            `<span class="reason-tag">${r}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show detail
+        async function showDetail(decisionId) {
+            const decision = allDecisions.find(d => d.id === decisionId);
+            if (!decision) return;
+
+            // Fetch change event
+            let changeEvent = null;
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/change-events/${decision.change_event_id}`);
+                if (response.ok) changeEvent = await response.json();
+            } catch (e) {}
+
+            const modal = document.getElementById('detail-modal');
+            const content = document.getElementById('detail-content');
+
+            content.innerHTML = `
+                <h2 style="font-size: 32px; margin-bottom: 8px;">Decision Details</h2>
+                <p style="color: var(--text-tertiary); margin-bottom: 32px;">ID: ${decision.id}</p>
+
+                <div class="detail-section">
+                    <h3>Risk Analysis</h3>
+                    <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 16px;">
+                        <div class="risk-badge ${getRiskClass(decision.risk_score)}" style="font-size: 32px; padding: 16px 24px;">
+                            ${decision.risk_score}/100
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-tertiary); margin-bottom: 4px;">Mode</div>
+                            <div style="font-weight: 600;">${decision.mode.toUpperCase()}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-tertiary); margin-bottom: 4px;">Status</div>
+                            <div style="font-weight: 600; color: ${decision.allowed ? 'var(--success)' : 'var(--danger)'}">
+                                ${decision.allowed ? 'ALLOWED' : 'BLOCKED'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Reasons</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        ${decision.reasons.map(r => `<li style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 8px;">• ${r}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Guardrails Triggered</h3>
+                    ${decision.guardrails_triggered.map(gr => `
+                        <div class="guardrail-item">
+                            <div class="guardrail-header">
+                                <span class="guardrail-id">${gr.id}</span>
+                                <span class="guardrail-severity ${getRiskClass(gr.severity)}">Severity: ${gr.severity}</span>
+                            </div>
+                            <p style="margin: 8px 0; color: var(--text-secondary);">${gr.message}</p>
+                            ${gr.evidence && gr.evidence.length > 0 ? `
+                                <ul class="evidence-list">
+                                    ${gr.evidence.map(e => `<li class="evidence-item">${e}</li>`).join('')}
+                                </ul>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+
+                ${changeEvent ? `
+                    <div class="detail-section">
+                        <h3>Change Event</h3>
+                        <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 8px;">
+                            <p><strong>Source:</strong> ${changeEvent.source}</p>
+                            <p><strong>Repository:</strong> ${changeEvent.repo}</p>
+                            <p><strong>SHA:</strong> <code style="background: var(--bg-primary); padding: 2px 6px; border-radius: 4px;">${changeEvent.sha}</code></p>
+                            ${changeEvent.pr_number ? `<p><strong>PR/MR:</strong> #${changeEvent.pr_number}</p>` : ''}
+                            <p><strong>Files Changed:</strong> ${changeEvent.files.length}</p>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                renderDecisions();
+            });
+        });
+
+        // Close modal on outside click
+        document.getElementById('detail-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'detail-modal') closeModal();
+        });
+
+        // Error handling
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Initial load
+        fetchDecisions();
+        setInterval(fetchDecisions, 30000); // Refresh every 30s
+    </script>
+</body>
+</html>

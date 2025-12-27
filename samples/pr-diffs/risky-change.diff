@@ -1,0 +1,41 @@
+diff --git a/samples/critical-service/deployment.yaml b/samples/critical-service/deployment.yaml
+--- a/samples/critical-service/deployment.yaml
++++ b/samples/critical-service/deployment.yaml
+@@ -5,7 +5,6 @@ spec:
+       containers:
+       - name: app
+-        image: myapp:v1.0.0
++        image: myapp:latest
+-        resources:
+-          limits:
+-            cpu: 500m
+-            memory: 512Mi
+-          requests:
+-            cpu: 200m
+-            memory: 256Mi
++        # Resources removed for performance testing
+         ports:
+         - containerPort: 8080
+@@ -13,20 +12,3 @@ spec:
+         - containerPort: 8080
+---
+-apiVersion: autoscaling/v2
+-kind: HorizontalPodAutoscaler
+-metadata:
+-  name: critical-service-hpa
+-  namespace: production
+-spec:
+-  scaleTargetRef:
+-    apiVersion: apps/v1
+-    kind: Deployment
+-    name: critical-service
+-  minReplicas: 3
+-  maxReplicas: 10
+-  metrics:
+-  - type: Resource
+-    resource:
+-      name: cpu
+-      target:
+-        type: Utilization
+-        averageUtilization: 70
+

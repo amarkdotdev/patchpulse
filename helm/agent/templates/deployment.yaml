@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agent.fullname" . }}
+  labels:
+    {{- include "agent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "agent.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "agent.fullname" . }}
+      containers:
+      - name: agent
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: BACKEND_URL
+          value: {{ .Values.env.BACKEND_URL | quote }}
+        - name: API_TOKEN
+          value: {{ .Values.env.API_TOKEN | quote }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+

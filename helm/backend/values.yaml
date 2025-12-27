@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: patchpulse-backend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: patchpulse.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+env:
+  DATABASE_URL: "postgresql://patchpulse:patchpulse@postgres:5432/patchpulse"
+  POLICY_MODE: "advisory"
+  LOG_LEVEL: "INFO"
+
+postgres:
+  enabled: true
+  image: postgres:15-alpine
+  database: patchpulse
+  username: patchpulse
+  password: patchpulse
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+

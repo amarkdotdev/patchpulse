@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - PatchPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg-primary: #000000;
+            --bg-secondary: #1C1C1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #EBEBF5;
+            --border: #38383A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 56px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .faq-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item.active {
+            border-color: var(--primary);
+        }
+
+        .faq-question {
+            padding: 24px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .faq-icon {
+            font-size: 24px;
+            transition: transform 0.3s;
+            color: var(--primary);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 24px;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding: 0 24px 24px;
+        }
+
+        .faq-answer-content {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.6;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Frequently Asked Questions</h1>
+            <p>Everything you need to know about PatchPulse</p>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>How does PatchPulse work?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    PatchPulse analyzes your Kubernetes deployment changes before they reach production. When you create a PR or MR, our Git integration fetches the diff, our AI evaluates it against guardrails, and we provide a risk score with explainable evidence. You can run in advisory mode (log only) or enforce mode (block risky changes).
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>What guardrails are included?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    PatchPulse includes 6 production-ready guardrails: missing resource limits, disabled HPA, high CPU usage, excessive pod restarts, critical service modifications, and latest image tags. You can also create custom guardrails using our policy engine.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>How accurate is the risk scoring?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Our risk scoring is deterministic and based on weighted guardrail severities plus modifiers for critical namespaces. Every decision includes concrete evidence - the exact diff hunks and cluster signals that triggered each guardrail. This transparency helps teams understand and trust the system.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>Does it work with my existing CI/CD?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Yes! PatchPulse integrates seamlessly with GitHub, GitLab, and can be integrated into any CI/CD pipeline. We support webhooks and API calls, so you can trigger risk analysis at any stage of your deployment process.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>What's the performance impact?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    PatchPulse is designed to be lightweight and fast. The agent runs as a single pod in your cluster with minimal resource requirements. Risk analysis typically completes in under 5 seconds. The agent uses read-only Kubernetes API access, so there's no impact on your cluster performance.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>Can I customize the guardrails?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Absolutely! PatchPulse uses a registry-based policy engine that makes it easy to add custom guardrails. You can write guardrails in Python that analyze diffs and cluster signals, then register them with the system. Enterprise plans include support for custom policy development.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>Is there a free tier?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Yes! Our Starter plan is free forever and includes up to 5 repositories, basic guardrails, and advisory mode. Perfect for trying out PatchPulse or small teams. Upgrade to Professional for enforce mode, unlimited repos, and Slack integration.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+                <span>How do I get started?</span>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    Getting started is easy! You can deploy PatchPulse to your Kubernetes cluster using our Helm charts, or run it locally with Docker Compose. The setup takes about 10 minutes. Check out our quickstart guide or try the interactive demo to see it in action.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFaq(element) {
+            const item = element.parentElement;
+            const isActive = item.classList.contains('active');
+            
+            // Close all other items
+            document.querySelectorAll('.faq-item').forEach(faq => {
+                faq.classList.remove('active');
+            });
+            
+            // Toggle current item
+            if (!isActive) {
+                item.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
+

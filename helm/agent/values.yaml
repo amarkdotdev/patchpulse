@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: patchpulse-agent
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+env:
+  BACKEND_URL: "http://patchpulse-backend:8000"
+  API_TOKEN: ""
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+

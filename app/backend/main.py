@@ -18,10 +18,16 @@ from starlette.responses import Response
 
 from models import (
     ChangeEvent, ClusterSignal, Decision, DecisionResponse, GuardrailResult,
-    ChangeEventDB, ClusterSignalDB, DecisionDB,
-    BlogPost, BlogPostDB, BlogPostCreate, BlogPostUpdate,
-    User, UserDB, UserSignup, UserLogin
+    ChangeEventDB, ClusterSignalDB, DecisionDB
 )
+try:
+    from models import BlogPost, BlogPostDB, BlogPostCreate, BlogPostUpdate
+except ImportError:
+    BlogPost = BlogPostDB = BlogPostCreate = BlogPostUpdate = None
+try:
+    from models import User, UserDB, UserSignup, UserLogin
+except ImportError:
+    User = UserDB = UserSignup = UserLogin = None
 from database import init_db, get_db
 from policy_engine import evaluate_policy
 from ai_features import (

@@ -124,21 +124,24 @@ async def serve_marketing(path: str):
     if path.startswith("api/") or path.startswith("dashboard") or path.startswith("docs") or path == "health" or path == "metrics":
         raise HTTPException(status_code=404)
     
-    # Try marketing directory first
-    file_path = os.path.join("marketing", path)
-    if os.path.exists(file_path) and os.path.isfile(file_path):
-        return FileResponse(file_path)
-    
-    # Try as HTML file
-    if not path.endswith((".html", ".css", ".js", ".png", ".jpg", ".svg", ".ico", ".json")):
-        html_path = os.path.join("marketing", f"{path}.html")
-        if os.path.exists(html_path):
-            return FileResponse(html_path)
+    # Try website directory first (in Docker it's /app/website)
+    website_paths = ["/app/website", "website"]
+    for base_path in website_paths:
+        file_path = os.path.join(base_path, path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        # Try as HTML file
+        if not path.endswith((".html", ".css", ".js", ".png", ".jpg", ".svg", ".ico", ".json", ".woff", ".woff2")):
+            html_path = os.path.join(base_path, f"{path}.html")
+            if os.path.exists(html_path):
+                return FileResponse(html_path)
     
     # Default to index.html for directories
-    index_path = os.path.join("marketing", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
+    for base_path in website_paths:
+        index_path = os.path.join(base_path, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
     
     raise HTTPException(status_code=404, detail="File not found")
 

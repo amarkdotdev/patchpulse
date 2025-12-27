@@ -203,34 +203,37 @@ async def metrics():
 
 
 @app.post("/api/v1/auth/signup", response_model=User)
-async def login(credentials: UserLogin, db: Session = Depends(get_db)):
+async def signup(user_data: UserSignup, db: Session = Depends(get_db)):
     """Login endpoint - authenticates users and returns JWT token."""
-    from auth import verify_password, create_access_token
+    from auth import hash_password
     
-    # Find user
-    user = db.query(UserDB).filter(UserDB.email == credentials.email).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    # Check if user already exists
+    existing_user = db.query(UserDB).filter(UserDB.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
     
-    if not user.is_active:
-        raise HTTPException(status_code=401, detail="Account is inactive")
+    # Validate password
+    if len(user_data.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
     
-    # Verify password
-    if not verify_password(credentials.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    
-    # Update last login
-    user.last_login = datetime.utcnow()
-    db.commit()
-    
-    # Create access token
-    access_token = create_access_token(
-        data={"sub": user.id, "email": user.email, "plan": user.plan}
+    # Create new user
+    password_hash = hash_password(user_data.password)
+    new_user = UserDB(
+        email=user_data.email,
+        password_hash=password_hash,
+        full_name=user_data.full_name,
+        company=user_data.company,
+        plan="free"
     )
     
-    logger.info(f"User logged in: {user.email}")
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
     
-    return {
+    logger.info(f"New user signed up: {new_user.email}")
+    
+    return User.model_validate(new_user)
+
         "access_token": access_token,
         "token_type": "bearer",
         "user": {

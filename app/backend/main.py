@@ -234,6 +234,36 @@ async def signup(user_data: UserSignup, db: Session = Depends(get_db)):
     
     return User.model_validate(new_user)
 
+
+@app.post("/api/v1/auth/login")
+async def login(credentials: UserLogin, db: Session = Depends(get_db)):
+    """Login endpoint - authenticates users and returns JWT token."""
+    from auth import verify_password, create_access_token
+    
+    # Find user
+    user = db.query(UserDB).filter(UserDB.email == credentials.email).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    if not user.is_active:
+        raise HTTPException(status_code=401, detail="Account is inactive")
+    
+    # Verify password
+    if not verify_password(credentials.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Update last login
+    user.last_login = datetime.utcnow()
+    db.commit()
+    
+    # Create access token
+    access_token = create_access_token(
+        data={"sub": user.id, "email": user.email, "plan": user.plan}
+    )
+    
+    logger.info(f"User logged in: {user.email}")
+    
+    return {
         "access_token": access_token,
         "token_type": "bearer",
         "user": {
@@ -244,8 +274,6 @@ async def signup(user_data: UserSignup, db: Session = Depends(get_db)):
             "plan": user.plan
         }
     }
-    from auth import create_access_token
-    try:
         body = await request.json()
         email = body.get("email", "")
         password = body.get("password", "")

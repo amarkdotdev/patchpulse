@@ -160,7 +160,7 @@ async def metrics():
 
 
 @app.post("/api/v1/auth/login")
-async def login(request: Request):
+async def login(request: FastAPIRequest):
     """Login endpoint - authenticates users and returns JWT token."""
     from auth import create_access_token
     try:

@@ -273,7 +273,8 @@
                     signupBtn.disabled = false;
                 }
             } catch (e) {
-                errorDiv.textContent = 'Connection error. Please try again.';
+                console.error('Signup error:', e);
+                errorDiv.textContent = `Connection error: ${e.message || 'Please try again.'}`;
                 errorDiv.style.display = 'block';
                 signupBtn.textContent = 'Create Account';
                 signupBtn.disabled = false;

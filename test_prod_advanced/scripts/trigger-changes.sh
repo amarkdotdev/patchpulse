@@ -51,3 +51,4 @@ echo "  • Old image version → SECURITY VULNERABILITY RISK"
 echo ""
 echo "📊 Check PatchPulse dashboard for detailed analysis!"
 
+

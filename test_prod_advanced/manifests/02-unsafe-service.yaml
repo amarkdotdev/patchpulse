@@ -28,3 +28,4 @@ spec:
     app: internal-api
   # ⚠️ PROBLEM: Exposed to all namespaces (no network policies)
 
+

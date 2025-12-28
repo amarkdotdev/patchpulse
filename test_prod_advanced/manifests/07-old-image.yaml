@@ -25,3 +25,4 @@ spec:
         # ⚠️ PROBLEM: No image pull secrets for private registry
         # ⚠️ PROBLEM: No image scanning configured
 
+

@@ -52,3 +52,4 @@ echo "   • Investigate high CPU usage before deploying"
 echo "   • Consider scaling horizontally instead"
 echo "   • Review recent pod restart patterns"
 
+

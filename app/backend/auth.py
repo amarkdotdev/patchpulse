@@ -3,23 +3,15 @@
 import os
 import secrets
 import hashlib
+import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from models import UserDB
 from database import get_db
-
-# Password hashing
-# Configure bcrypt with explicit backend to avoid version detection issues
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    bcrypt__rounds=12,
-    deprecated="auto"
-)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", secrets.token_urlsafe(32))
 ALGORITHM = "HS256"
@@ -29,28 +21,44 @@ security = HTTPBearer(auto_error=False)
 
 
 def hash_password(password: str) -> str:
-    """Hash a password using bcrypt."""
-    # Ensure password is not longer than 72 bytes (bcrypt limit)
+    """Hash a password using bcrypt directly."""
+    # Convert to bytes and ensure not longer than 72 bytes (bcrypt limit)
     if isinstance(password, str):
         password_bytes = password.encode('utf-8')
-        if len(password_bytes) > 72:
-            password_bytes = password_bytes[:72]
-            password = password_bytes.decode('utf-8', errors='ignore')
-    try:
-        return pwd_context.hash(password)
-    except ValueError as e:
-        # Handle bcrypt version compatibility issues
-        if "cannot be longer than 72 bytes" in str(e):
-            # Truncate to 72 bytes
-            password_bytes = password.encode('utf-8')[:72]
-            password = password_bytes.decode('utf-8', errors='ignore')
-            return pwd_context.hash(password)
-        raise
+    else:
+        password_bytes = password
+    
+    # Truncate if longer than 72 bytes
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    
+    # Generate salt and hash
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        # Convert to bytes
+        if isinstance(plain_password, str):
+            plain_password_bytes = plain_password.encode('utf-8')
+        else:
+            plain_password_bytes = plain_password
+        
+        # Truncate if longer than 72 bytes
+        if len(plain_password_bytes) > 72:
+            plain_password_bytes = plain_password_bytes[:72]
+        
+        if isinstance(hashed_password, str):
+            hashed_password_bytes = hashed_password.encode('utf-8')
+        else:
+            hashed_password_bytes = hashed_password
+        
+        return bcrypt.checkpw(plain_password_bytes, hashed_password_bytes)
+    except Exception:
+        return False
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

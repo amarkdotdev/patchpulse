@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: production
+data:
+  database_url: "postgresql://user:password@db:5432/prod"  # ⚠️ PROBLEM: Credentials in ConfigMap
+  api_endpoint: "https://api.example.com"
+  debug: "true"  # ⚠️ PROBLEM: Debug enabled in production
+  log_level: "DEBUG"  # ⚠️ PROBLEM: Debug logging in production
+  feature_flags: |
+    experimental_feature: true  # ⚠️ PROBLEM: Experimental features in prod
+    beta_api: enabled
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: production
+type: Opaque
+data:
+  # ⚠️ PROBLEM: Base64 encoded but not encrypted
+  # ⚠️ PROBLEM: Secret in git (should use external secret management)
+  password: cGFzc3dvcmQxMjM=  # password123
+  api_key: YWJjZGVmZ2hpams=  # abcdefghijk
+

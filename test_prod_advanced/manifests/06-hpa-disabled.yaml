@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-service
+  namespace: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scalable-service
+  template:
+    metadata:
+      labels:
+        app: scalable-service
+    spec:
+      containers:
+      - name: app
+        image: nginx:latest
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # ⚠️ PROBLEM: No HPA configured - cannot scale automatically
+        # ⚠️ PROBLEM: Fixed replica count - no auto-scaling
+
+---
+# ⚠️ PROBLEM: Missing HorizontalPodAutoscaler
+# Should have:
+# apiVersion: autoscaling/v2
+# kind: HorizontalPodAutoscaler
+# metadata:
+#   name: scalable-service-hpa
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: scalable-service
+#   minReplicas: 2
+#   maxReplicas: 10
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       target:
+#         type: Utilization
+#         averageUtilization: 70
+

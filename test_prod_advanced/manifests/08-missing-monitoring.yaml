@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unmonitored-service
+  namespace: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: unmonitored-service
+  template:
+    metadata:
+      labels:
+        app: unmonitored-service
+      # ⚠️ PROBLEM: No Prometheus annotations for scraping
+      # annotations:
+      #   prometheus.io/scrape: "true"
+      #   prometheus.io/port: "8080"
+      #   prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: app
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        # ⚠️ PROBLEM: No liveness probe
+        # ⚠️ PROBLEM: No readiness probe
+        # ⚠️ PROBLEM: No startup probe
+        # ⚠️ PROBLEM: No metrics endpoint exposed
+

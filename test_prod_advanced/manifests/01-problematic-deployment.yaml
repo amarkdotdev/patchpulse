@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: critical-api-service
+  namespace: production
+  labels:
+    app: critical-api
+    tier: backend
+spec:
+  replicas: 1  # ⚠️ PROBLEM: Only 1 replica - no high availability
+  selector:
+    matchLabels:
+      app: critical-api
+  template:
+    metadata:
+      labels:
+        app: critical-api
+    spec:
+      containers:
+      - name: api
+        image: nginx:latest
+        resources:
+          # ⚠️ PROBLEM: No resource limits - can consume all cluster resources
+          requests:
+            memory: "100Mi"
+          # Missing limits!
+        securityContext:
+          # ⚠️ PROBLEM: Running as root - security risk
+          runAsUser: 0
+          privileged: true  # ⚠️ PROBLEM: Privileged container
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          # ⚠️ PROBLEM: Missing readiness probe
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+        # ⚠️ PROBLEM: No readiness probe
+        env:
+        - name: API_KEY
+          value: "hardcoded-secret-key-12345"  # ⚠️ PROBLEM: Hardcoded secret
+        - name: DEBUG_MODE
+          value: "true"  # ⚠️ PROBLEM: Debug mode in production
+      # ⚠️ PROBLEM: No pod disruption budget
+      # ⚠️ PROBLEM: No network policies
+      # ⚠️ PROBLEM: No service account specified
+

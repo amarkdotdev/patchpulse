@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resource-hog
+  namespace: production
+spec:
+  replicas: 10  # ⚠️ PROBLEM: Too many replicas without justification
+  selector:
+    matchLabels:
+      app: resource-hog
+  template:
+    metadata:
+      labels:
+        app: resource-hog
+    spec:
+      containers:
+      - name: worker
+        image: busybox:latest
+        resources:
+          requests:
+            memory: "2Gi"  # ⚠️ PROBLEM: Very high memory request
+            cpu: "1000m"   # ⚠️ PROBLEM: High CPU request
+          limits:
+            memory: "4Gi"  # ⚠️ PROBLEM: Extremely high memory limit
+            cpu: "2000m"   # ⚠️ PROBLEM: Very high CPU limit
+        command: ["sh", "-c", "while true; do sleep 3600; done"]
+        # ⚠️ PROBLEM: No health checks
+        # ⚠️ PROBLEM: No graceful shutdown
+

@@ -131,48 +131,6 @@ async def root():
     return {"name": "PatchPulse API", "version": "1.0.0"}
 
 
-@app.get("/{path:path}")
-async def serve_marketing(path: str):
-    """Serve marketing static files."""
-    from fastapi.responses import FileResponse
-    import os
-    
-    # Don't serve API routes or system endpoints
-    # Allow "docs/" for website documentation, but block "/docs" (API docs endpoint)
-    # Note: dashboard is handled by the mount above, so it won't reach here
-    if path.startswith("api/") or path in ["health", "metrics", "docs"]:
-        raise HTTPException(status_code=404)
-    
-    # Try website directory first (in Docker it's /app/website)
-    website_paths = ["/app/website", "website"]
-    for base_path in website_paths:
-        # Direct file path
-        file_path = os.path.join(base_path, path)
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            return FileResponse(file_path)
-        
-        # Try as HTML file if no extension
-        if not path.endswith((".html", ".css", ".js", ".png", ".jpg", ".svg", ".ico", ".json", ".woff", ".woff2", ".gif", ".webp")):
-            html_path = os.path.join(base_path, f"{path}.html")
-            if os.path.exists(html_path):
-                return FileResponse(html_path)
-        
-        # Handle docs/ subdirectory
-        if path.startswith("docs/"):
-            docs_file = os.path.join(base_path, path)
-            if os.path.exists(docs_file):
-                return FileResponse(docs_file)
-            # Try with .html extension
-            docs_html = os.path.join(base_path, f"{path}.html")
-            if os.path.exists(docs_html):
-                return FileResponse(docs_html)
-    
-    # Default to index.html for directories
-    for base_path in website_paths:
-        index_path = os.path.join(base_path, "index.html")
-        if os.path.exists(index_path):
-            return FileResponse(index_path)
-    
     raise HTTPException(status_code=404, detail="File not found")
 
 
@@ -638,3 +596,45 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
+@app.get("/{path:path}")
+async def serve_marketing(path: str):
+    """Serve marketing static files."""
+    from fastapi.responses import FileResponse
+    import os
+    
+    # Don't serve API routes or system endpoints
+    # Allow "docs/" for website documentation, but block "/docs" (API docs endpoint)
+    # Note: dashboard is handled by the mount above, so it won't reach here
+    if path.startswith("api/") or path in ["health", "metrics", "docs"]:
+        raise HTTPException(status_code=404)
+    
+    # Try website directory first (in Docker it's /app/website)
+    website_paths = ["/app/website", "website"]
+    for base_path in website_paths:
+        # Direct file path
+        file_path = os.path.join(base_path, path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        # Try as HTML file if no extension
+        if not path.endswith((".html", ".css", ".js", ".png", ".jpg", ".svg", ".ico", ".json", ".woff", ".woff2", ".gif", ".webp")):
+            html_path = os.path.join(base_path, f"{path}.html")
+            if os.path.exists(html_path):
+                return FileResponse(html_path)
+        
+        # Handle docs/ subdirectory
+        if path.startswith("docs/"):
+            docs_file = os.path.join(base_path, path)
+            if os.path.exists(docs_file):
+                return FileResponse(docs_file)
+            # Try with .html extension
+            docs_html = os.path.join(base_path, f"{path}.html")
+            if os.path.exists(docs_html):
+                return FileResponse(docs_html)
+    
+    # Default to index.html for directories
+    for base_path in website_paths:
+        index_path = os.path.join(base_path, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+    

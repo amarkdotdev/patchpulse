@@ -144,6 +144,21 @@
         </div>
 
         <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+        
+        <script>
+            // Check for signup success parameter
+            (function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('signup') === 'success') {
+                    const successDiv = document.getElementById('successMessage');
+                    if (successDiv) {
+                        successDiv.textContent = 'Account created successfully! Please log in.';
+                        successDiv.style.display = 'block';
+                    }
+                }
+            })();
+        </script>
 
         <form onsubmit="handleLogin(event)">
             <div class="form-group">

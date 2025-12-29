@@ -417,6 +417,47 @@ async def create_change_event(
         except Exception as e:
             logger.error(f"Webhook trigger failed: {str(e)}")
         
+        # Trigger integrations (Teams, Email, PagerDuty)
+        try:
+            decision_data = {
+                "decision_id": decision.id,
+                "change_event_id": db_event.id,
+                "risk_score": policy_result["risk_score"],
+                "allowed": policy_result["allowed"],
+                "reasons": policy_result["reasons"],
+                "guardrails_triggered": guardrails_serialized,
+                "mode": mode,
+                "repo": db_event.repo,
+                "pr_number": db_event.pr_number,
+                "sha": db_event.sha
+            }
+            
+            # Teams integration
+            try:
+                from integrations.teams.notifier import TeamsNotifier
+                teams_notifier = TeamsNotifier()
+                teams_notifier.send_decision_notification(decision_data)
+            except Exception as e:
+                logger.debug(f"Teams notification failed: {str(e)}")
+            
+            # Email integration
+            try:
+                from integrations.email.notifier import EmailNotifier
+                email_notifier = EmailNotifier()
+                email_notifier.send_decision_notification(decision_data)
+            except Exception as e:
+                logger.debug(f"Email notification failed: {str(e)}")
+            
+            # PagerDuty integration
+            try:
+                from integrations.pagerduty.notifier import PagerDutyNotifier
+                pagerduty_notifier = PagerDutyNotifier()
+                pagerduty_notifier.send_decision_notification(decision_data)
+            except Exception as e:
+                logger.debug(f"PagerDuty notification failed: {str(e)}")
+        except Exception as e:
+            logger.error(f"Integration notification failed: {str(e)}")
+        
         from security import validate_no_key_leakage, sanitize_for_logging
         
         response = {
@@ -905,6 +946,35 @@ async def compare_changes(
         "risk_comparison": risk_comparison,
         "recommendations": recommendations
     }
+
+
+# Integration management endpoints
+@app.get("/api/v1/integrations")
+async def list_integrations():
+    """List all available integrations and their status."""
+    from integration_manager import get_integration_config
+    
+    integrations = {}
+    for integration_type in ["teams", "email", "pagerduty"]:
+        config = get_integration_config(integration_type)
+        integrations[integration_type] = {
+            "enabled": config.get("enabled", False) if config else False,
+            "configured": bool(config)
+        }
+    
+    return integrations
+
+
+@app.post("/api/v1/integrations/{integration_type}/test")
+async def test_integration(integration_type: str):
+    """Test an integration configuration."""
+    from integration_manager import test_integration
+    
+    if integration_type not in ["teams", "email", "pagerduty"]:
+        raise HTTPException(status_code=400, detail="Invalid integration type")
+    
+    result = test_integration(integration_type)
+    return result
 
 
 # Audit log endpoint

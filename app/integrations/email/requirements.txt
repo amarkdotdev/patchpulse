@@ -1,0 +1,3 @@
+# Email integration uses standard library (smtplib, email)
+# No additional dependencies required
+

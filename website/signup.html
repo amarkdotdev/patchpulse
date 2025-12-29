@@ -230,18 +230,22 @@
             try {
                 const response = await fetch('/api/v1/auth/signup', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({
-                        email: email,
+                        email: email.trim(),
                         password: password,
-                        full_name: fullName || null,
-                        company: company || null
+                        full_name: fullName.trim() || null,
+                        company: company.trim() || null
                     })
                 });
                 
+                const responseData = await response.json().catch(() => ({}));
+                
                 if (response.ok) {
-                    const data = await response.json();
-                    successDiv.textContent = 'Account created successfully! Redirecting...';
+                    successDiv.textContent = 'Account created successfully! Redirecting to login...';
                     successDiv.style.display = 'block';
                     
                     // Auto-login after signup
@@ -249,32 +253,59 @@
                         try {
                             const loginResponse = await fetch('/api/v1/auth/login', {
                                 method: 'POST',
-                                headers: {'Content-Type': 'application/json'},
-                                body: JSON.stringify({email: email, password: password})
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    email: email.trim(),
+                                    password: password
+                                })
                             });
                             
                             if (loginResponse.ok) {
                                 const loginData = await loginResponse.json();
-                                localStorage.setItem('patchpulse_token', loginData.access_token);
-                                localStorage.setItem('patchpulse_user', JSON.stringify(loginData.user));
-                                window.location.href = '/dashboard';
+                                if (loginData.access_token) {
+                                    localStorage.setItem('patchpulse_token', loginData.access_token);
+                                    if (loginData.user) {
+                                        localStorage.setItem('patchpulse_user', JSON.stringify(loginData.user));
+                                    }
+                                    window.location.href = '/dashboard';
+                                } else {
+                                    window.location.href = '/login?signup=success';
+                                }
                             } else {
-                                window.location.href = '/login';
+                                const loginError = await loginResponse.json().catch(() => ({}));
+                                console.error('Auto-login failed:', loginError);
+                                window.location.href = '/login?signup=success';
                             }
                         } catch (e) {
-                            window.location.href = '/login';
+                            console.error('Auto-login error:', e);
+                            window.location.href = '/login?signup=success';
                         }
                     }, 1500);
                 } else {
-                    const error = await response.json();
-                    errorDiv.textContent = error.detail || 'Sign up failed. Please try again.';
+                    // Handle error response
+                    let errorMessage = 'Sign up failed. Please try again.';
+                    
+                    if (responseData.detail) {
+                        if (typeof responseData.detail === 'string') {
+                            errorMessage = responseData.detail;
+                        } else if (Array.isArray(responseData.detail) && responseData.detail.length > 0) {
+                            errorMessage = responseData.detail[0].msg || responseData.detail[0].message || errorMessage;
+                        }
+                    } else if (responseData.message) {
+                        errorMessage = responseData.message;
+                    }
+                    
+                    errorDiv.textContent = errorMessage;
                     errorDiv.style.display = 'block';
                     signupBtn.textContent = 'Create Account';
                     signupBtn.disabled = false;
                 }
             } catch (e) {
                 console.error('Signup error:', e);
-                errorDiv.textContent = `Connection error: ${e.message || 'Please try again.'}`;
+                errorDiv.textContent = `Connection error. Please check your internet connection and try again.`;
                 errorDiv.style.display = 'block';
                 signupBtn.textContent = 'Create Account';
                 signupBtn.disabled = false;

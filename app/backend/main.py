@@ -183,11 +183,16 @@ async def metrics():
 
 @app.post("/api/v1/auth/signup", response_model=User)
 async def signup(user_data: UserSignup, db: Session = Depends(get_db)):
-    """Login endpoint - authenticates users and returns JWT token."""
+    """Signup endpoint - creates new user account."""
     from auth import hash_password
     
+    # Trim and validate email
+    email = user_data.email.strip().lower() if user_data.email else ""
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Valid email is required")
+    
     # Check if user already exists
-    existing_user = db.query(UserDB).filter(UserDB.email == user_data.email).first()
+    existing_user = db.query(UserDB).filter(UserDB.email == email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
@@ -198,20 +203,25 @@ async def signup(user_data: UserSignup, db: Session = Depends(get_db)):
     # Create new user
     password_hash = hash_password(user_data.password)
     new_user = UserDB(
-        email=user_data.email,
+        email=email,
         password_hash=password_hash,
-        full_name=user_data.full_name,
-        company=user_data.company,
+        full_name=user_data.full_name.strip() if user_data.full_name else None,
+        company=user_data.company.strip() if user_data.company else None,
         plan="free"
     )
     
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    logger.info(f"New user signed up: {new_user.email}")
-    
-    return User.model_validate(new_user)
+    try:
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        
+        logger.info(f"New user signed up: {new_user.email}")
+        
+        return User.model_validate(new_user)
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error creating user: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to create account. Please try again.")
 
 
 @app.post("/api/v1/auth/login")

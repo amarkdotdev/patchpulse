@@ -28,6 +28,16 @@ try:
     from models import User, UserDB, UserSignup, UserLogin
 except ImportError:
     User = UserDB = UserSignup = UserLogin = None
+try:
+    from models import (
+        Webhook, WebhookCreate, WebhookUpdate,
+        ApprovalRequest, ApprovalResponse,
+        BulkOperationRequest, ChangeComparisonRequest, ChangeComparison
+    )
+except ImportError:
+    Webhook = WebhookCreate = WebhookUpdate = None
+    ApprovalRequest = ApprovalResponse = None
+    BulkOperationRequest = ChangeComparisonRequest = ChangeComparison = None
 from database import init_db, get_db
 from policy_engine import evaluate_policy
 from ai_features import (
@@ -36,6 +46,17 @@ from ai_features import (
     predict_incident_risk,
     get_cost_optimization_suggestions
 )
+try:
+    from export import export_decisions_csv, export_decisions_json, export_analytics_report
+except ImportError:
+    export_decisions_csv = export_decisions_json = export_analytics_report = None
+try:
+    from webhooks import WebhookDB, trigger_webhooks_for_decision
+except ImportError:
+    WebhookDB = None
+    trigger_webhooks_for_decision = None
+from export import export_decisions_csv, export_decisions_json, export_analytics_report
+from webhooks import WebhookDB, trigger_webhooks_for_decision
 
 # Configure logging
 logging.basicConfig(
@@ -380,6 +401,22 @@ async def create_change_event(
         }
         await broadcast_decision(decision_data)
         
+        # Trigger webhooks
+        try:
+            await trigger_webhooks_for_decision(
+                db,
+                decision.id,
+                {
+                    "id": decision.id,
+                    "change_event_id": db_event.id,
+                    "risk_score": policy_result["risk_score"],
+                    "allowed": policy_result["allowed"],
+                    "reasons": policy_result["reasons"]
+                }
+            )
+        except Exception as e:
+            logger.error(f"Webhook trigger failed: {str(e)}")
+        
         from security import validate_no_key_leakage, sanitize_for_logging
         
         response = {
@@ -590,6 +627,347 @@ async def get_risk_trend(
         }
         for r in results
     ]
+
+
+# Export endpoints
+@app.get("/api/v1/export/decisions")
+async def export_decisions_endpoint(
+    format: str = "json",  # json or csv
+    limit: int = 1000,
+    db: Session = Depends(get_db)
+):
+    """Export decisions in CSV or JSON format."""
+    if not export_decisions_csv:
+        raise HTTPException(status_code=501, detail="Export functionality not available")
+    
+    decisions = db.query(DecisionDB).order_by(DecisionDB.created_at.desc()).limit(limit).all()
+    
+    # Get change events
+    change_event_ids = [d.change_event_id for d in decisions]
+    change_events = {
+        ce.id: ce for ce in db.query(ChangeEventDB).filter(ChangeEventDB.id.in_(change_event_ids)).all()
+    }
+    
+    if format.lower() == "csv":
+        return export_decisions_csv(decisions, change_events)
+    else:
+        return export_decisions_json(decisions, change_events)
+
+
+@app.get("/api/v1/export/analytics")
+async def export_analytics_endpoint(db: Session = Depends(get_db)):
+    """Export comprehensive analytics report."""
+    if not export_analytics_report:
+        raise HTTPException(status_code=501, detail="Export functionality not available")
+    return export_analytics_report(db)
+
+
+# Webhook endpoints
+@app.post("/api/v1/webhooks")
+async def create_webhook(
+    webhook_data: dict,
+    db: Session = Depends(get_db)
+):
+    """Create a new webhook."""
+    if not WebhookDB:
+        raise HTTPException(status_code=501, detail="Webhooks not available")
+    
+    from uuid import uuid4
+    
+    webhook = WebhookDB(
+        id=str(uuid4()),
+        url=webhook_data.get("url"),
+        events=webhook_data.get("events", ["decision_created"]),
+        secret=webhook_data.get("secret"),
+        headers=webhook_data.get("headers"),
+        enabled=True
+    )
+    
+    db.add(webhook)
+    db.commit()
+    db.refresh(webhook)
+    
+    logger.info(f"Webhook created: {webhook.id} -> {webhook.url}")
+    
+    return {
+        "id": webhook.id,
+        "url": webhook.url,
+        "events": webhook.events,
+        "enabled": webhook.enabled,
+        "created_at": webhook.created_at.isoformat()
+    }
+
+
+@app.get("/api/v1/webhooks")
+async def list_webhooks(db: Session = Depends(get_db)):
+    """List all webhooks."""
+    if not WebhookDB:
+        raise HTTPException(status_code=501, detail="Webhooks not available")
+    
+    webhooks = db.query(WebhookDB).all()
+    return [
+        {
+            "id": w.id,
+            "url": w.url,
+            "events": w.events,
+            "enabled": w.enabled,
+            "created_at": w.created_at.isoformat(),
+            "last_triggered": w.last_triggered.isoformat() if w.last_triggered else None
+        }
+        for w in webhooks
+    ]
+
+
+# Approval workflow endpoints
+@app.post("/api/v1/decisions/{decision_id}/approve")
+async def approve_decision(
+    decision_id: str,
+    approval: dict,
+    db: Session = Depends(get_db)
+):
+    """Approve a high-risk decision (manual override)."""
+    decision = db.query(DecisionDB).filter(DecisionDB.id == decision_id).first()
+    if not decision:
+        raise HTTPException(status_code=404, detail="Decision not found")
+    
+    decision.allowed = True
+    decision.triggered_by = f"manual_approval:{approval.get('approver_email', 'unknown')}"
+    
+    if not decision.outputs:
+        decision.outputs = {}
+    decision.outputs["manual_approval"] = {
+        "approved": True,
+        "approver": approval.get("approver_email"),
+        "comment": approval.get("comment"),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    db.commit()
+    
+    logger.info(f"Decision {decision_id} manually approved")
+    
+    return {
+        "decision_id": decision_id,
+        "approved": True,
+        "message": "Decision approved"
+    }
+
+
+@app.post("/api/v1/decisions/{decision_id}/reject")
+async def reject_decision(
+    decision_id: str,
+    approval: dict,
+    db: Session = Depends(get_db)
+):
+    """Reject a decision (manual override)."""
+    decision = db.query(DecisionDB).filter(DecisionDB.id == decision_id).first()
+    if not decision:
+        raise HTTPException(status_code=404, detail="Decision not found")
+    
+    decision.allowed = False
+    decision.triggered_by = f"manual_rejection:{approval.get('approver_email', 'unknown')}"
+    
+    if not decision.outputs:
+        decision.outputs = {}
+    decision.outputs["manual_rejection"] = {
+        "rejected": True,
+        "rejector": approval.get("approver_email"),
+        "comment": approval.get("comment"),
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    db.commit()
+    
+    logger.info(f"Decision {decision_id} manually rejected")
+    
+    return {
+        "decision_id": decision_id,
+        "rejected": True,
+        "message": "Decision rejected"
+    }
+
+
+# Bulk operations
+@app.post("/api/v1/decisions/bulk")
+async def bulk_operation(
+    operation: dict,
+    db: Session = Depends(get_db)
+):
+    """Perform bulk operation on decisions."""
+    decision_ids = operation.get("decision_ids", [])
+    action = operation.get("action", "approve")
+    comment = operation.get("comment")
+    
+    decisions = db.query(DecisionDB).filter(DecisionDB.id.in_(decision_ids)).all()
+    
+    if len(decisions) != len(decision_ids):
+        raise HTTPException(status_code=400, detail="Some decision IDs not found")
+    
+    updated = 0
+    for decision in decisions:
+        if action == "approve":
+            decision.allowed = True
+            decision.triggered_by = "bulk_approval"
+        elif action == "reject":
+            decision.allowed = False
+            decision.triggered_by = "bulk_rejection"
+        elif action == "delete":
+            db.delete(decision)
+            continue
+        
+        if not decision.outputs:
+            decision.outputs = {}
+        decision.outputs[f"bulk_{action}"] = {
+            "comment": comment,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        updated += 1
+    
+    db.commit()
+    
+    return {
+        "action": action,
+        "processed": len(decisions),
+        "updated": updated if action != "delete" else 0,
+        "deleted": len(decisions) - updated if action == "delete" else 0
+    }
+
+
+# Change comparison
+@app.post("/api/v1/change-events/compare")
+async def compare_changes(
+    comparison: dict,
+    db: Session = Depends(get_db)
+):
+    """Compare two change events."""
+    event1_id = comparison.get("change_event_id_1")
+    event2_id = comparison.get("change_event_id_2")
+    
+    event1 = db.query(ChangeEventDB).filter(ChangeEventDB.id == event1_id).first()
+    event2 = db.query(ChangeEventDB).filter(ChangeEventDB.id == event2_id).first()
+    
+    if not event1 or not event2:
+        raise HTTPException(status_code=404, detail="One or both change events not found")
+    
+    decision1 = db.query(DecisionDB).filter(DecisionDB.change_event_id == event1.id).first()
+    decision2 = db.query(DecisionDB).filter(DecisionDB.change_event_id == event2.id).first()
+    
+    differences = []
+    files1 = set([h.get('file', '') for h in (event1.diff_hunks or [])])
+    files2 = set([h.get('file', '') for h in (event2.diff_hunks or [])])
+    
+    only_in_1 = files1 - files2
+    only_in_2 = files2 - files1
+    
+    for file in only_in_1:
+        differences.append({
+            "type": "only_in_first",
+            "file": file,
+            "description": f"File {file} only appears in first change"
+        })
+    
+    for file in only_in_2:
+        differences.append({
+            "type": "only_in_second",
+            "file": file,
+            "description": f"File {file} only appears in second change"
+        })
+    
+    risk_comparison = {
+        "change_1_risk": decision1.risk_score if decision1 else None,
+        "change_2_risk": decision2.risk_score if decision2 else None,
+        "risk_difference": (decision2.risk_score if decision2 else 0) - (decision1.risk_score if decision1 else 0)
+    }
+    
+    recommendations = []
+    if decision1 and decision2:
+        if decision1.risk_score > decision2.risk_score:
+            recommendations.append("First change has higher risk")
+        elif decision2.risk_score > decision1.risk_score:
+            recommendations.append("Second change has higher risk")
+    
+    return {
+        "change_event_1": {
+            "id": event1.id,
+            "repo": event1.repo,
+            "sha": event1.sha,
+            "pr_number": event1.pr_number,
+            "files": event1.files
+        },
+        "change_event_2": {
+            "id": event2.id,
+            "repo": event2.repo,
+            "sha": event2.sha,
+            "pr_number": event2.pr_number,
+            "files": event2.files
+        },
+        "differences": differences,
+        "risk_comparison": risk_comparison,
+        "recommendations": recommendations
+    }
+
+
+# Audit log endpoint
+@app.get("/api/v1/audit")
+async def get_audit_log(
+    limit: int = 100,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """Get comprehensive audit log of all decisions and actions."""
+    query = db.query(DecisionDB)
+    
+    if start_date:
+        try:
+            start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            query = query.filter(DecisionDB.created_at >= start)
+        except:
+            pass
+    
+    if end_date:
+        try:
+            end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            query = query.filter(DecisionDB.created_at <= end)
+        except:
+            pass
+    
+    decisions = query.order_by(DecisionDB.created_at.desc()).limit(limit).all()
+    
+    audit_entries = []
+    for decision in decisions:
+        change_event = db.query(ChangeEventDB).filter(ChangeEventDB.id == decision.change_event_id).first()
+        
+        entry = {
+            "timestamp": decision.created_at.isoformat(),
+            "type": "decision",
+            "decision_id": decision.id,
+            "change_event_id": decision.change_event_id,
+            "action": "allowed" if decision.allowed else "blocked",
+            "risk_score": decision.risk_score,
+            "triggered_by": decision.triggered_by,
+            "mode": decision.mode,
+            "change_event": {
+                "repo": change_event.repo if change_event else None,
+                "pr_number": change_event.pr_number if change_event else None,
+                "sha": change_event.sha if change_event else None
+            } if change_event else None
+        }
+        
+        if decision.outputs:
+            if "manual_approval" in decision.outputs:
+                entry["manual_action"] = "approved"
+                entry["approver"] = decision.outputs["manual_approval"].get("approver")
+            elif "manual_rejection" in decision.outputs:
+                entry["manual_action"] = "rejected"
+                entry["rejector"] = decision.outputs["manual_rejection"].get("rejector")
+        
+        audit_entries.append(entry)
+    
+    return {
+        "total": len(audit_entries),
+        "entries": audit_entries
+    }
 
 
 if __name__ == "__main__":

@@ -235,3 +235,82 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+
+# Webhook Models
+class WebhookCreate(BaseModel):
+    """Model for creating a webhook."""
+    url: str
+    events: Optional[List[str]] = None  # decision_created, decision_blocked, high_risk, etc.
+    secret: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+
+
+class WebhookUpdate(BaseModel):
+    """Model for updating a webhook."""
+    url: Optional[str] = None
+    events: Optional[List[str]] = None
+    secret: Optional[str] = None
+    enabled: Optional[bool] = None
+    headers: Optional[Dict[str, str]] = None
+
+
+class Webhook(BaseModel):
+    """Pydantic model for webhook."""
+    id: str
+    url: str
+    events: Optional[List[str]] = None
+    enabled: bool = True
+    created_at: datetime
+    last_triggered: Optional[datetime] = None
+    failure_count: int = 0
+
+    class Config:
+        from_attributes = True
+
+
+# Approval Models
+class ApprovalRequest(BaseModel):
+    """Model for approval request."""
+    decision_id: str
+    approver_email: Optional[str] = None
+    comment: Optional[str] = None
+
+
+class ApprovalResponse(BaseModel):
+    """Model for approval response."""
+    decision_id: str
+    approved: bool
+    approver_email: Optional[str] = None
+    comment: Optional[str] = None
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Bulk Operation Models
+class BulkOperationRequest(BaseModel):
+    """Model for bulk operation."""
+    decision_ids: List[str]
+    action: str  # approve, reject, or delete
+    comment: Optional[str] = None
+
+
+# Change Comparison Models
+class ChangeComparisonRequest(BaseModel):
+    """Model for comparing two changes."""
+    change_event_id_1: str
+    change_event_id_2: str
+
+
+class ChangeComparison(BaseModel):
+    """Model for change comparison result."""
+    change_event_1: Dict
+    change_event_2: Dict
+    differences: List[Dict]
+    risk_comparison: Dict
+    recommendations: List[str]
+
+    class Config:
+        from_attributes = True
+

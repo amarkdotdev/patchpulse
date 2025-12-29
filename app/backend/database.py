@@ -4,6 +4,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
+from webhooks import WebhookDB  # Import webhook model
 
 # Database URL from env, default to SQLite for local dev
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./patchpulse.db")

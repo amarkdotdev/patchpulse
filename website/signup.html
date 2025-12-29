@@ -217,7 +217,15 @@
             errorDiv.style.display = 'none';
             successDiv.style.display = 'none';
             
-            // Validate
+            // Validate email
+            const emailTrimmed = email.trim();
+            if (!emailTrimmed || !emailTrimmed.includes('@') || !emailTrimmed.includes('.')) {
+                errorDiv.textContent = 'Please enter a valid email address';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Validate password
             if (password.length < 8) {
                 errorDiv.textContent = 'Password must be at least 8 characters';
                 errorDiv.style.display = 'block';
@@ -235,7 +243,7 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        email: email.trim(),
+                        email: emailTrimmed,
                         password: password,
                         full_name: fullName.trim() || null,
                         company: company.trim() || null
@@ -258,7 +266,7 @@
                                     'Accept': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    email: email.trim(),
+                                    email: emailTrimmed,
                                     password: password
                                 })
                             });

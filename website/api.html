@@ -177,6 +177,96 @@
             </div>
         </div>
 
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/export/decisions</span>
+            </div>
+            <div class="endpoint-description">
+                Export decisions to CSV or JSON format. Supports filtering and pagination for compliance and analysis.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/export/analytics</span>
+            </div>
+            <div class="endpoint-description">
+                Export comprehensive analytics report with summary statistics, guardrail metrics, and decision history.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v1/webhooks</span>
+            </div>
+            <div class="endpoint-description">
+                Create webhooks for outbound notifications. Configure event types, custom headers, and webhook secrets.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v1/decisions/{id}/approve</span>
+            </div>
+            <div class="endpoint-description">
+                Manually approve a high-risk decision. Supports approver tracking and comments for audit trail.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v1/decisions/bulk</span>
+            </div>
+            <div class="endpoint-description">
+                Perform bulk operations on multiple decisions. Approve, reject, or delete decisions in batch.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v1/change-events/compare</span>
+            </div>
+            <div class="endpoint-description">
+                Compare two change events side-by-side. Analyze differences, risk changes, and get recommendations.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/audit</span>
+            </div>
+            <div class="endpoint-description">
+                Get comprehensive audit log of all decisions and actions. Filter by date range and export for compliance.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v1/integrations</span>
+            </div>
+            <div class="endpoint-description">
+                List all available integrations (Teams, Email, PagerDuty) and their configuration status.
+            </div>
+        </div>
+
+        <div class="api-endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v1/integrations/{type}/test</span>
+            </div>
+            <div class="endpoint-description">
+                Test an integration configuration. Verify Teams, Email, or PagerDuty integration setup.
+            </div>
+        </div>
+
         <div class="cta-section">
             <h2>Interactive API Docs</h2>
             <p style="color: var(--text-secondary); margin-top: 12px;">

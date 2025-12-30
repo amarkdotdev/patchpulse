@@ -314,3 +314,64 @@ class ChangeComparison(BaseModel):
     class Config:
         from_attributes = True
 
+
+# Evidence Pack Models
+class EvidencePack(BaseModel):
+    """Model for evidence pack."""
+    decision_id: str
+    timestamp: datetime
+    change_event: Dict
+    risk_analysis: Dict
+    guardrails: List[Dict]
+    matched_hunks: List[Dict]
+    signal_queries: List[Dict]
+    signal_results_digest: str
+    evidence_hash: str
+
+    class Config:
+        from_attributes = True
+
+
+# Policy Bundle Models
+class PolicyBundleCreate(BaseModel):
+    """Model for creating policy bundle."""
+    name: str
+    version: str
+    policies: List[Dict]
+    signature: Optional[str] = None
+    active: bool = False
+
+
+class PolicyBundle(BaseModel):
+    """Model for policy bundle."""
+    id: str
+    name: str
+    version: str
+    bundle_hash: str
+    active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Tenant Models
+class TenantCreate(BaseModel):
+    """Model for creating tenant."""
+    name: str
+    display_name: Optional[str] = None
+    data_retention_days: int = 90
+    policy_overrides: Optional[Dict] = None
+
+
+class Tenant(BaseModel):
+    """Model for tenant."""
+    id: str
+    name: str
+    display_name: Optional[str] = None
+    created_at: datetime
+    is_active: bool = True
+
+    class Config:
+        from_attributes = True
+

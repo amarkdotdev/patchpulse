@@ -1071,6 +1071,210 @@ async def get_repository_stats(
         raise HTTPException(status_code=501, detail="Repository stats not available")
 
 
+# Admission Webhook endpoints
+@app.post("/admission/validate")
+async def admission_validate(request: Request):
+    """Kubernetes validating admission webhook."""
+    try:
+        from admission_webhook import validate_admission
+        return await validate_admission(request)
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Admission webhook not available")
+
+
+@app.post("/admission/mutate")
+async def admission_mutate(request: Request):
+    """Kubernetes mutating admission webhook."""
+    try:
+        from admission_webhook import mutate_admission
+        return await mutate_admission(request)
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Admission webhook not available")
+
+
+# Policy Bundles
+@app.post("/api/v1/policy-bundles")
+async def create_policy_bundle(bundle_data: dict, db: Session = Depends(get_db)):
+    """Create a new policy bundle."""
+    try:
+        from policy_bundles import create_policy_bundle, PolicyBundleDB
+        from uuid import uuid4
+        
+        bundle = create_policy_bundle(
+            name=bundle_data.get("name", "default"),
+            version=bundle_data.get("version", "1.0.0"),
+            policies=bundle_data.get("policies", []),
+            signature=bundle_data.get("signature")
+        )
+        
+        db_bundle = PolicyBundleDB(
+            id=str(uuid4()),
+            version=bundle.version,
+            name=bundle.name,
+            bundle_hash=bundle.bundle_hash,
+            signature=bundle.signature,
+            content=bundle.to_dict(),
+            active=bundle_data.get("active", False),
+            created_by=bundle_data.get("created_by", "system")
+        )
+        
+        db.add(db_bundle)
+        db.commit()
+        
+        return bundle.to_dict()
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Policy bundles not available")
+
+
+@app.get("/api/v1/policy-bundles")
+async def list_policy_bundles(db: Session = Depends(get_db)):
+    """List all policy bundles."""
+    try:
+        from policy_bundles import PolicyBundleDB
+        bundles = db.query(PolicyBundleDB).all()
+        return [
+            {
+                "id": b.id,
+                "name": b.name,
+                "version": b.version,
+                "bundle_hash": b.bundle_hash,
+                "active": b.active,
+                "created_at": b.created_at.isoformat()
+            }
+            for b in bundles
+        ]
+    except ImportError:
+        return []
+
+
+# Evidence Pack
+@app.get("/api/v1/decisions/{decision_id}/evidence")
+async def get_decision_evidence(decision_id: str, db: Session = Depends(get_db)):
+    """Get evidence pack for a decision."""
+    try:
+        from evidence_pack import generate_evidence_pack
+        from models import DecisionDB, ChangeEventDB
+        
+        decision = db.query(DecisionDB).filter(DecisionDB.id == decision_id).first()
+        if not decision:
+            raise HTTPException(status_code=404, detail="Decision not found")
+        
+        change_event = db.query(ChangeEventDB).filter(
+            ChangeEventDB.id == decision.change_event_id
+        ).first()
+        
+        if not change_event:
+            raise HTTPException(status_code=404, detail="Change event not found")
+        
+        # Get previous decision for comparison
+        previous_decision = db.query(DecisionDB).filter(
+            DecisionDB.change_event_id == decision.change_event_id,
+            DecisionDB.id != decision.id
+        ).order_by(DecisionDB.created_at.desc()).first()
+        
+        previous_score = previous_decision.risk_score if previous_decision else None
+        
+        # Convert to models
+        from models import ChangeEvent, ClusterSignal
+        change_event_model = ChangeEvent(
+            source=change_event.source,
+            repo=change_event.repo,
+            sha=change_event.sha,
+            pr_number=change_event.pr_number,
+            branch=change_event.branch,
+            files=change_event.files or [],
+            diff_hunks=change_event.diff_hunks or [],
+            timestamp=change_event.timestamp
+        )
+        
+        evidence = generate_evidence_pack(
+            decision_id=decision.id,
+            change_event=change_event_model,
+            risk_score=decision.risk_score,
+            guardrails_triggered=decision.guardrails_triggered or [],
+            cluster_signals=[],
+            previous_score=previous_score
+        )
+        
+        return evidence
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Evidence packs not available")
+
+
+# SBOM Verification
+@app.post("/api/v1/sbom/verify")
+async def verify_sbom(verification_request: dict):
+    """Verify image SBOM, signature, and provenance."""
+    try:
+        from sbom_verification import verify_image_supply_chain
+        
+        image = verification_request.get("image")
+        image_digest = verification_request.get("image_digest")
+        
+        if not image:
+            raise HTTPException(status_code=400, detail="Image required")
+        
+        result = verify_image_supply_chain(image, image_digest)
+        return result
+    except ImportError:
+        raise HTTPException(status_code=501, detail="SBOM verification not available")
+
+
+# Signal Correlation
+@app.get("/api/v1/signals/correlate/{change_event_id}")
+async def correlate_signals(
+    change_event_id: str,
+    namespace: str,
+    db: Session = Depends(get_db)
+):
+    """Correlate cluster signals to a change event."""
+    try:
+        from signal_collector_v2 import correlate_change_to_signals
+        return correlate_change_to_signals(change_event_id, namespace, db)
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Signal correlation not available")
+
+
+@app.get("/api/v1/namespaces/{namespace}/stability")
+async def get_namespace_stability(namespace: str, db: Session = Depends(get_db):
+    """Get namespace stability assessment."""
+    try:
+        from signal_collector_v2 import get_namespace_stability
+        return get_namespace_stability(namespace, db)
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Signal collector not available")
+
+
+# Multi-Tenancy
+@app.post("/api/v1/tenants")
+async def create_tenant(tenant_data: dict, db: Session = Depends(get_db)):
+    """Create a new tenant."""
+    try:
+        from multi_tenancy import TenantDB
+        from uuid import uuid4
+        
+        tenant = TenantDB(
+            id=str(uuid4()),
+            name=tenant_data.get("name"),
+            display_name=tenant_data.get("display_name"),
+            data_retention_days=tenant_data.get("data_retention_days", 90),
+            policy_overrides=tenant_data.get("policy_overrides", {})
+        )
+        
+        db.add(tenant)
+        db.commit()
+        db.refresh(tenant)
+        
+        return {
+            "id": tenant.id,
+            "name": tenant.name,
+            "display_name": tenant.display_name,
+            "created_at": tenant.created_at.isoformat()
+        }
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Multi-tenancy not available")
+
+
 # Audit log endpoint
 @app.get("/api/v1/audit")
 async def get_audit_log(

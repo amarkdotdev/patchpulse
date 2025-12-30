@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: patchpulse-admission-webhook
+  namespace: patchpulse
+spec:
+  selector:
+    app: admission-webhook
+  ports:
+  - port: 443
+    targetPort: 8443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admission-webhook
+  namespace: patchpulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admission-webhook
+  template:
+    metadata:
+      labels:
+        app: admission-webhook
+    spec:
+      containers:
+      - name: webhook
+        image: patchpulse-backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8443
+        command: ["python", "-m", "uvicorn", "admission_webhook:webhook_app", "--host", "0.0.0.0", "--port", "8443"]
+        env:
+        - name: ADMISSION_MODE
+          value: "advisory"  # Change to "enforce" for blocking mode
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: patchpulse-validating-webhook
+webhooks:
+- name: patchpulse-validate.patchpulse.io
+  clientConfig:
+    service:
+      name: patchpulse-admission-webhook
+      namespace: patchpulse
+      path: "/validate"
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apps"]
+    apiVersions: ["v1"]
+    resources: ["deployments"]
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: patchpulse-mutating-webhook
+webhooks:
+- name: patchpulse-mutate.patchpulse.io
+  clientConfig:
+    service:
+      name: patchpulse-admission-webhook
+      namespace: patchpulse
+      path: "/mutate"
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["apps"]
+    apiVersions: ["v1"]
+    resources: ["deployments"]
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+

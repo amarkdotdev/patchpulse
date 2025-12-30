@@ -987,6 +987,90 @@ async def test_integration(integration_type: str):
     return result
 
 
+# Policy Templates
+@app.get("/api/v1/policy-templates")
+async def list_policy_templates():
+    """List all available policy templates."""
+    try:
+        from policy_templates import list_policy_templates
+        return list_policy_templates()
+    except ImportError:
+        return []
+
+
+@app.get("/api/v1/policy-templates/{template_id}")
+async def get_policy_template(template_id: str):
+    """Get a specific policy template."""
+    try:
+        from policy_templates import get_policy_template
+        template = get_policy_template(template_id)
+        if not template:
+            raise HTTPException(status_code=404, detail="Template not found")
+        return {
+            "id": template.id,
+            "name": template.name,
+            "description": template.description,
+            "guardrails": template.guardrails,
+            "mode": template.mode
+        }
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Policy templates not available")
+
+
+# Scheduled Reports
+@app.post("/api/v1/reports/scheduled")
+async def create_scheduled_report(report_config: dict, db: Session = Depends(get_db)):
+    """Create a scheduled report configuration."""
+    try:
+        from scheduled_reports import ScheduledReport, generate_scheduled_report
+        from uuid import uuid4
+        
+        report = ScheduledReport(
+            id=str(uuid4()),
+            name=report_config.get("name", "Report"),
+            schedule=report_config.get("schedule", "weekly"),
+            recipients=report_config.get("recipients", []),
+            format=report_config.get("format", "json"),
+            filters=report_config.get("filters", {})
+        )
+        
+        # Generate report
+        report_data = generate_scheduled_report(report, db)
+        
+        return report_data
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Scheduled reports not available")
+
+
+# Change History
+@app.get("/api/v1/change-history")
+async def get_change_history(
+    repo: Optional[str] = None,
+    days: int = 30,
+    db: Session = Depends(get_db)
+):
+    """Get change history for repositories."""
+    try:
+        from change_history import get_change_history
+        return get_change_history(repo=repo, days=days, db=db)
+    except ImportError:
+        return []
+
+
+@app.get("/api/v1/repositories/{repo}/stats")
+async def get_repository_stats(
+    repo: str,
+    days: int = 30,
+    db: Session = Depends(get_db)
+):
+    """Get statistics for a specific repository."""
+    try:
+        from change_history import get_repository_stats
+        return get_repository_stats(repo=repo, days=days, db=db)
+    except ImportError:
+        raise HTTPException(status_code=501, detail="Repository stats not available")
+
+
 # Audit log endpoint
 @app.get("/api/v1/audit")
 async def get_audit_log(

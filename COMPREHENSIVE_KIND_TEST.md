@@ -441,7 +441,7 @@ curl -s "http://localhost:8001/api/v1/change-history?days=30" | jq 'length'
 
 **Command:**
 ```bash
-curl -s "http://localhost:8001/api/v1/repositories/demo%2Frepo/stats" | jq '{repo, total_changes, avg_risk_score}'
+curl -s "http://localhost:8001/api/v1/repositories/demo%2Frepo/stats" | jq '.'
 ```
 
 **Actual Output:**
@@ -449,7 +449,12 @@ curl -s "http://localhost:8001/api/v1/repositories/demo%2Frepo/stats" | jq '{rep
 {
   "repo": "demo/repo",
   "total_changes": 1,
-  "avg_risk_score": 92.0
+  "total_decisions": 1,
+  "high_risk_changes": 0,
+  "blocked_changes": 0,
+  "avg_risk_score": 25.0,
+  "period_days": 30,
+  "last_change": "2025-12-29T..."
 }
 ```
 
@@ -465,17 +470,27 @@ curl -s "http://localhost:8001/api/v1/repositories/demo%2Frepo/stats" | jq '{rep
 ```bash
 curl -s -X POST "http://localhost:8001/api/v1/reports/scheduled" \
   -H "Content-Type: application/json" \
-  -d '{"name":"Weekly Report","schedule":"weekly","recipients":["admin@example.com"],"format":"json"}' | jq '{report_name, summary}'
+  -d '{"name":"Weekly Report","schedule":"weekly","recipients":["admin@example.com"],"format":"json"}' | jq '.'
 ```
 
 **Actual Output:**
 ```json
 {
+  "report_id": "xxxx-xxxx-xxxx",
   "report_name": "Weekly Report",
+  "generated_at": "2025-12-29T...",
+  "period": {
+    "start": "2025-12-22T...",
+    "end": "2025-12-29T...",
+    "schedule": "weekly"
+  },
   "summary": {
     "total_decisions": 1,
-    "avg_risk_score": 92.0
-  }
+    "high_risk": 0,
+    "blocked": 0,
+    "avg_risk_score": 25.0
+  },
+  "decisions": [...]
 }
 ```
 

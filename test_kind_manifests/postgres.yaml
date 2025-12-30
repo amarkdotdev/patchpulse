@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-config
-  namespace: patchpulse-test
+  namespace: patchpulse
 data:
   POSTGRES_DB: patchpulse
   POSTGRES_USER: patchpulse
@@ -12,7 +12,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
-  namespace: patchpulse-test
+  namespace: patchpulse
 spec:
   accessModes:
     - ReadWriteOnce
@@ -24,7 +24,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: patchpulse-test
+  namespace: patchpulse
 spec:
   replicas: 1
   selector:
@@ -55,7 +55,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres
-  namespace: patchpulse-test
+  namespace: patchpulse
 spec:
   selector:
     app: postgres

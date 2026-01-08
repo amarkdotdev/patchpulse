@@ -97,3 +97,5 @@ def verify_image_supply_chain(image: str, image_digest: Optional[str] = None) ->
     verifier = SBOMVerifier()
     return verifier.verify_image(image, image_digest)
 
+
+

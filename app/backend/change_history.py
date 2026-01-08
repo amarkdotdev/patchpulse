@@ -76,3 +76,5 @@ def get_repository_stats(repo: str, days: int = 30, db: Session = None) -> Dict:
         "last_change": events[0].timestamp.isoformat() if events else None
     }
 
+
+

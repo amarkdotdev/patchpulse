@@ -1,9 +1,9 @@
-"""AI-powered analysis using DeepSeek API."""
+"""AI-powered analysis supporting multiple providers (OpenAI, DeepSeek, Claude, Gemini)."""
 
 import os
 import json
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any, Callable
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -11,39 +11,178 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Initialize DeepSeek client - SECURE: Never log or expose API key
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
+# Supported AI providers
+AI_PROVIDERS = {
+    "openai": {
+        "name": "OpenAI",
+        "env_key": "OPENAI_API_KEY",
+        "base_url": None,  # Uses default OpenAI endpoint
+        "default_model": "gpt-4o-mini"
+    },
+    "deepseek": {
+        "name": "DeepSeek",
+        "env_key": "DEEPSEEK_API_KEY",
+        "base_url": "https://api.deepseek.com/v1",
+        "default_model": "deepseek-chat"
+    },
+    "claude": {
+        "name": "Claude (Anthropic)",
+        "env_key": "ANTHROPIC_API_KEY",
+        "base_url": None,
+        "default_model": "claude-3-5-sonnet-20241022"
+    },
+    "gemini": {
+        "name": "Google Gemini",
+        "env_key": "GEMINI_API_KEY",
+        "base_url": None,
+        "default_model": "gemini-1.5-pro"
+    }
+}
 
-# Security: Validate API key format without exposing it
-def _validate_api_key(key: Optional[str]) -> bool:
-    """Validate API key format without exposing the key."""
-    if not key:
-        return False
-    # Check it starts with 'sk-' and has reasonable length
-    return key.startswith("sk-") and len(key) > 20
+# Get configured provider from env (defaults to first available)
+AI_PROVIDER = os.getenv("AI_PROVIDER", "").lower()
+if AI_PROVIDER not in AI_PROVIDERS:
+    AI_PROVIDER = None
 
+# Initialize client based on available API keys
 client = None
-if DEEPSEEK_API_KEY and _validate_api_key(DEEPSEEK_API_KEY):
-    try:
-        client = OpenAI(
-            api_key=DEEPSEEK_API_KEY,
-            base_url=DEEPSEEK_BASE_URL
-        )
-        # Test connection without exposing key
-        logger.info("DeepSeek AI client initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize DeepSeek client: {str(e)}")
-        client = None
-else:
-    logger.warning("DEEPSEEK_API_KEY not found or invalid, AI analysis will be disabled")
+client_type = None
+_api_keys = {}  # Store all API keys for sanitization
+
+# Try to initialize client for each provider in priority order
+for provider_id, provider_config in AI_PROVIDERS.items():
+    api_key = os.getenv(provider_config["env_key"])
+    if api_key:
+        _api_keys[provider_id] = api_key
+        
+        # If specific provider requested, only try that one
+        if AI_PROVIDER and provider_id != AI_PROVIDER:
+            continue
+            
+        try:
+            if provider_id in ["openai", "deepseek"]:
+                # OpenAI-compatible API
+                # Support custom base URL for OpenAI (e.g., Ollama, LocalAI, etc.)
+                base_url = provider_config["base_url"]
+                if provider_id == "openai":
+                    # Allow override via OPENAI_BASE_URL env var for custom endpoints
+                    custom_base_url = os.getenv("OPENAI_BASE_URL")
+                    if custom_base_url:
+                        base_url = custom_base_url
+                        logger.info(f"Using custom OpenAI-compatible endpoint: {base_url}")
+                
+                client = OpenAI(
+                    api_key=api_key,
+                    base_url=base_url if base_url else None
+                )
+                client_type = provider_id
+                logger.info(f"{provider_config['name']} AI client initialized successfully")
+                break
+            elif provider_id == "claude":
+                # Anthropic Claude - use OpenAI client with Anthropic endpoint
+                try:
+                    from anthropic import Anthropic
+                    client = Anthropic(api_key=api_key)
+                    client_type = "claude"
+                    logger.info(f"{provider_config['name']} AI client initialized successfully")
+                    break
+                except ImportError:
+                    logger.warning("anthropic package not installed. Install with: pip install anthropic")
+            elif provider_id == "gemini":
+                # Google Gemini
+                try:
+                    import google.generativeai as genai
+                    genai.configure(api_key=api_key)
+                    client = genai
+                    client_type = "gemini"
+                    logger.info(f"{provider_config['name']} AI client initialized successfully")
+                    break
+                except ImportError:
+                    logger.warning("google-generativeai package not installed. Install with: pip install google-generativeai")
+        except Exception as e:
+            logger.error(f"Failed to initialize {provider_config['name']} client: {str(e)}")
+            client = None
+            client_type = None
+
+if not client:
+    available_keys = [k for k, v in _api_keys.items() if v]
+    if available_keys:
+        logger.warning(f"AI API keys found but client initialization failed. Available: {', '.join(available_keys)}")
+    else:
+        logger.warning("No AI API keys found. Set one of: OPENAI_API_KEY, DEEPSEEK_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY")
 
 # Security: Sanitize any strings that might contain API key
 def _sanitize_log_message(msg: str) -> str:
     """Remove any potential API key from log messages."""
-    if DEEPSEEK_API_KEY:
-        return msg.replace(DEEPSEEK_API_KEY, "[REDACTED]")
-    return msg
+    sanitized = msg
+    for key in _api_keys.values():
+        if key:
+            sanitized = sanitized.replace(key, "[REDACTED]")
+    return sanitized
+
+
+def _call_ai_api(messages: List[Dict], model: Optional[str] = None, max_tokens: int = 2000, temperature: float = 0.3) -> str:
+    """Unified interface to call different AI providers."""
+    if not client:
+        raise ValueError("AI client not available")
+    
+    if client_type in ["openai", "deepseek"]:
+        # OpenAI-compatible API
+        provider_config = AI_PROVIDERS[client_type]
+        model = model or provider_config["default_model"]
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        return response.choices[0].message.content.strip()
+    
+    elif client_type == "claude":
+        # Anthropic Claude
+        provider_config = AI_PROVIDERS["claude"]
+        model = model or provider_config["default_model"]
+        # Convert messages format for Claude
+        system_msg = None
+        user_messages = []
+        for msg in messages:
+            if msg["role"] == "system":
+                system_msg = msg["content"]
+            else:
+                user_messages.append(msg)
+        
+        response = client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            system=system_msg if system_msg else "",
+            messages=user_messages
+        )
+        return response.content[0].text.strip()
+    
+    elif client_type == "gemini":
+        # Google Gemini
+        provider_config = AI_PROVIDERS["gemini"]
+        model_name = model or provider_config["default_model"]
+        gemini_model = client.GenerativeModel(model_name)
+        
+        # Convert messages format for Gemini
+        prompt_parts = []
+        for msg in messages:
+            role_prefix = "System: " if msg["role"] == "system" else ("User: " if msg["role"] == "user" else "Assistant: ")
+            prompt_parts.append(f"{role_prefix}{msg['content']}")
+        
+        response = gemini_model.generate_content(
+            "\n".join(prompt_parts),
+            generation_config={
+                "temperature": temperature,
+                "max_output_tokens": max_tokens,
+            }
+        )
+        return response.text.strip()
+    
+    else:
+        raise ValueError(f"Unsupported AI provider: {client_type}")
 
 
 def analyze_change_with_ai(
@@ -128,9 +267,8 @@ Respond in JSON format:
     "confidence": <0.0-1.0>
 }}"""
 
-        # Call DeepSeek API
-        response = client.chat.completions.create(
-            model="deepseek-chat",
+        # Call AI API (unified interface)
+        content = _call_ai_api(
             messages=[
                 {
                     "role": "system",
@@ -144,9 +282,6 @@ Respond in JSON format:
             temperature=0.3,  # Lower temperature for more consistent analysis
             max_tokens=2000
         )
-        
-        # Parse response
-        content = response.choices[0].message.content.strip()
         
         # Try to extract JSON from response
         try:
@@ -234,8 +369,7 @@ Provide a clear, concise explanation (2-3 sentences) that helps a developer unde
 2. Why it's risky
 3. What they should do about it"""
 
-        response = client.chat.completions.create(
-            model="deepseek-chat",
+        explanation = _call_ai_api(
             messages=[
                 {
                     "role": "system",
@@ -249,8 +383,6 @@ Provide a clear, concise explanation (2-3 sentences) that helps a developer unde
             temperature=0.5,
             max_tokens=300
         )
-        
-        explanation = response.choices[0].message.content.strip()
         return explanation
         
     except Exception as e:

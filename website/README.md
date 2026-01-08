@@ -1,12 +1,12 @@
-# PatchPulse Marketing Site
+# PatchPulse Website
 
-Beautiful, production-ready marketing website for PatchPulse.
+Beautiful, production-ready website for the open source PatchPulse project.
 
 ## Pages
 
-- **index.html** - Main landing page with hero, features, pricing, CTA
+- **index.html** - Main landing page with hero, features, getting started, CTA
 - **demo.html** - Interactive demo where users can test risk analysis
-- **testimonials.html** - Customer testimonials and reviews
+- **testimonials.html** - User testimonials and reviews
 - **integrations.html** - Integration showcase
 - **case-studies.html** - Real-world case studies
 - **blog.html** - Blog/updates section
@@ -32,7 +32,8 @@ Beautiful, production-ready marketing website for PatchPulse.
 ✅ Hero section with compelling copy
 ✅ Feature showcase
 ✅ Interactive demo
-✅ Pricing plans
+✅ Getting started section
+✅ AI provider information
 ✅ Testimonials
 ✅ Case studies
 ✅ Integrations

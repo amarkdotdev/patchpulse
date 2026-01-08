@@ -11,7 +11,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
@@ -55,8 +54,6 @@ try:
 except ImportError:
     WebhookDB = None
     trigger_webhooks_for_decision = None
-from export import export_decisions_csv, export_decisions_json, export_analytics_report
-from webhooks import WebhookDB, trigger_webhooks_for_decision
 
 # Configure logging
 logging.basicConfig(
@@ -81,7 +78,8 @@ async def broadcast_decision(decision_data: dict):
         for connection in active_connections:
             try:
                 await connection.send_text(message)
-            except:
+            except (WebSocketDisconnect, ConnectionError, RuntimeError) as e:
+                logger.debug(f"WebSocket connection error: {e}")
                 disconnected.append(connection)
         # Remove disconnected clients
         for conn in disconnected:
@@ -116,7 +114,6 @@ app.add_middleware(
 
 # Mount UI static files as dashboard
 try:
-    import os
     ui_paths = ["/app/ui", "app/ui", os.path.join(os.getcwd(), "app", "ui")]
     ui_dir = None
     for path in ui_paths:
@@ -143,7 +140,6 @@ async def dashboard_redirect():
 async def root():
     """Serve marketing index page at root."""
     from fastapi.responses import FileResponse
-    import os
     website_paths = ["/app/website", "website", os.path.join(os.getcwd(), "website")]
     for base_path in website_paths:
         index_path = os.path.join(base_path, "index.html")
@@ -1236,7 +1232,7 @@ async def correlate_signals(
 
 
 @app.get("/api/v1/namespaces/{namespace}/stability")
-async def get_namespace_stability(namespace: str, db: Session = Depends(get_db):
+async def get_namespace_stability(namespace: str, db: Session = Depends(get_db)):
     """Get namespace stability assessment."""
     try:
         from signal_collector_v2 import get_namespace_stability
@@ -1290,14 +1286,16 @@ async def get_audit_log(
         try:
             start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
             query = query.filter(DecisionDB.created_at >= start)
-        except:
+        except (ValueError, AttributeError) as e:
+            logger.warning(f"Invalid start_date format: {start_date}, error: {e}")
             pass
     
     if end_date:
         try:
             end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
             query = query.filter(DecisionDB.created_at <= end)
-        except:
+        except (ValueError, AttributeError) as e:
+            logger.warning(f"Invalid end_date format: {end_date}, error: {e}")
             pass
     
     decisions = query.order_by(DecisionDB.created_at.desc()).limit(limit).all()

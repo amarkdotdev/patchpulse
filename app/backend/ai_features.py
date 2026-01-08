@@ -4,21 +4,22 @@ import os
 import json
 import logging
 from typing import Dict, List, Optional
-from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Get client from ai_analyzer (reuse existing secure client)
+# Get client and API function from ai_analyzer (reuse existing secure client)
 try:
-    from ai_analyzer import client
+    from ai_analyzer import client, _call_ai_api, client_type
     ai_client = client
     AI_AVAILABLE = ai_client is not None
 except (ImportError, AttributeError):
     AI_AVAILABLE = False
     ai_client = None
+    _call_ai_api = None
+    client_type = None
     logger.warning("AI client not available for advanced features")
 
 
@@ -75,8 +76,7 @@ Respond in JSON:
     "recommendations": ["<rec1>", "<rec2>"]
 }}"""
 
-        response = ai_client.chat.completions.create(
-            model="deepseek-chat",
+        content = _call_ai_api(
             messages=[
                 {
                     "role": "system",
@@ -87,8 +87,6 @@ Respond in JSON:
             temperature=0.2,
             max_tokens=2000
         )
-        
-        content = response.choices[0].message.content.strip()
         
         # Extract JSON
         if "```json" in content:
@@ -159,8 +157,7 @@ Respond in JSON:
     "priority": ["<top 3 priority actions>"]
 }}"""
 
-        response = ai_client.chat.completions.create(
-            model="deepseek-chat",
+        content = _call_ai_api(
             messages=[
                 {
                     "role": "system",
@@ -171,8 +168,6 @@ Respond in JSON:
             temperature=0.3,
             max_tokens=2000
         )
-        
-        content = response.choices[0].message.content.strip()
         
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
@@ -243,8 +238,7 @@ Respond in JSON:
     "reasoning": "<brief explanation>"
 }}"""
 
-        response = ai_client.chat.completions.create(
-            model="deepseek-chat",
+        content = _call_ai_api(
             messages=[
                 {
                     "role": "system",
@@ -255,8 +249,6 @@ Respond in JSON:
             temperature=0.2,
             max_tokens=1500
         )
-        
-        content = response.choices[0].message.content.strip()
         
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
@@ -332,8 +324,7 @@ Respond in JSON:
     "priority": ["<top 3>"]
 }}"""
 
-        response = ai_client.chat.completions.create(
-            model="deepseek-chat",
+        content = _call_ai_api(
             messages=[
                 {
                     "role": "system",
@@ -344,8 +335,6 @@ Respond in JSON:
             temperature=0.3,
             max_tokens=2000
         )
-        
-        content = response.choices[0].message.content.strip()
         
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()

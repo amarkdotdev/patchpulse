@@ -23,7 +23,12 @@ services:
       DATABASE_URL: postgresql://patchpulse:patchpulse@postgres:5432/patchpulse
       POLICY_MODE: advisory
       LOG_LEVEL: INFO
+      # AI Provider - set one of these (or use AI_PROVIDER env var to specify)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      AI_PROVIDER: ${AI_PROVIDER:-}
     env_file:
       - .env
     ports:

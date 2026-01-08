@@ -92,3 +92,5 @@ def generate_scheduled_report(report_config: ScheduledReport, db: Session) -> Di
         logger.error(f"Error generating scheduled report: {str(e)}")
         raise
 
+
+

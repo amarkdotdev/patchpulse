@@ -1,8 +1,19 @@
 # PatchPulse
 
-**AI-Powered Pre-Flight Risk Analysis for Kubernetes**
+**🔓 100% Open Source | 🤖 Bring Your Own LLM | 🚀 Self-Hosted Kubernetes Risk Analysis**
 
-PatchPulse prevents production incidents by analyzing infrastructure changes and cluster signals before deployment. It combines rule-based guardrails with AI-powered analysis to provide explainable risk scores and automated enforcement.
+PatchPulse is a self-hosted, open-source solution that prevents production incidents by analyzing infrastructure changes and cluster signals before deployment. It combines rule-based guardrails with AI-powered analysis to provide explainable risk scores and automated enforcement.
+
+## ✨ Key Features
+
+- **🔓 Fully Open Source** - MIT License, no vendor lock-in
+- **🤖 Bring Your Own LLM** - Use OpenAI, DeepSeek, Claude, Gemini, or any OpenAI-compatible API
+- **🏠 Self-Hosted** - Your data stays on your infrastructure
+- **🛡️ 11+ Guardrails** - Rule-based checks for Kubernetes best practices
+- **🧠 AI-Powered Analysis** - Security scanning, recommendations, incident prediction
+- **⚡ Real-Time** - WebSocket updates and instant notifications
+- **🔌 Integrations** - GitHub, GitLab, Slack, Teams, PagerDuty, Email
+- **📊 Enterprise Features** - Admission webhooks, policy bundles, SBOM verification, multi-tenancy
 
 ## 🚀 Quick Start
 
@@ -13,74 +24,76 @@ PatchPulse prevents production incidents by analyzing infrastructure changes and
 - Go 1.21+ (for agent development)
 - kubectl (for Kubernetes integration)
 
-### Start with Docker Compose
+### 1. Clone the Repository
 
 ```bash
-# Clone the repository
 git clone https://github.com/amarkdotdev/patchpulse.git
 cd patchpulse
+```
 
-# Create .env file with your API keys
-echo "DEEPSEEK_API_KEY=your_key_here" > .env
+### 2. Configure Your LLM Provider
 
+PatchPulse supports multiple AI providers. **You only need to provide an API key for ONE provider:**
+
+```bash
+# Create .env file
+touch .env
+
+# Option 1: OpenAI (recommended for best results)
+echo "OPENAI_API_KEY=sk-your-key-here" >> .env
+
+# Option 2: DeepSeek (cost-effective alternative)
+# echo "DEEPSEEK_API_KEY=sk-your-key-here" >> .env
+
+# Option 3: Claude (Anthropic)
+# echo "ANTHROPIC_API_KEY=sk-ant-your-key-here" >> .env
+# Note: Requires: pip install anthropic
+
+# Option 4: Google Gemini
+# echo "GEMINI_API_KEY=your-key-here" >> .env
+# Note: Requires: pip install google-generativeai
+
+# Optionally specify which provider to use (defaults to first available)
+# echo "AI_PROVIDER=openai" >> .env
+```
+
+**💡 No LLM? No Problem!** PatchPulse works without AI - you'll get rule-based guardrails and risk scoring. AI features will be disabled gracefully.
+
+### 3. Start PatchPulse
+
+```bash
 # Start all services
 docker compose up -d
 
 # Check logs
 docker compose logs -f backend
 
-# Access the application
-# Website: http://localhost:8000/
-# Dashboard: http://localhost:8000/dashboard
-# API Docs: http://localhost:8000/docs
+# Wait for services to be ready (about 10-15 seconds)
 ```
 
-## 📁 Repository Structure
+### 4. Access the Application
 
-```
-patchpulse/
-├── app/                    # Application code
-│   ├── backend/           # FastAPI backend service
-│   │   ├── main.py        # Main application entry point
-│   │   ├── models.py      # Pydantic models and SQLAlchemy ORM
-│   │   ├── database.py    # Database connection and setup
-│   │   ├── policy_engine.py # Policy evaluation and guardrails
-│   │   ├── ai_analyzer.py # AI-powered risk analysis
-│   │   ├── ai_features.py # Advanced AI features
-│   │   ├── auth.py        # Authentication system
-│   │   ├── security.py    # Security utilities
-│   │   └── requirements.txt
-│   ├── agent/             # Kubernetes agent (Go)
-│   │   ├── cmd/agent/     # Agent main application
-│   │   └── Dockerfile
-│   ├── integrations/     # External integrations
-│   │   ├── git/           # GitHub/GitLab integration
-│   │   └── slack/         # Slack notifications
-│   └── ui/                # Dashboard UI
-│       ├── index.html     # Main dashboard
-│       └── customer-dashboard.html
-├── website/               # Marketing website
-│   ├── index.html         # Landing page
-│   ├── login.html         # Login page
-│   ├── docs/              # Documentation pages
-│   └── ...                # Other marketing pages
-├── docs/                  # Technical documentation
-│   ├── architecture.md    # System architecture
-│   ├── quickstart.md      # Quick start guide
-│   ├── demo.md            # Demo walkthrough
-│   ├── runbooks.md        # Operational runbooks
-│   └── threat-model.md    # Security threat model
-├── helm/                  # Kubernetes Helm charts
-│   ├── backend/           # Backend Helm chart
-│   └── agent/             # Agent Helm chart
-├── test_for_prod/         # Production test environment
-│   ├── setup_cluster.sh   # Setup local k3d cluster
-│   ├── deploy_patchpulse.sh # Deploy PatchPulse
-│   └── trigger_test_events.sh # Trigger test events
-├── docker-compose.yml     # Local development setup
-├── Makefile               # Common development tasks
-└── README.md              # This file
-```
+- **Website**: http://localhost:8000/
+- **Dashboard**: http://localhost:8000/dashboard
+- **API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+### 5. Create Your First Account
+
+1. Go to http://localhost:8000/signup
+2. Create an account
+3. Start using PatchPulse!
+
+## 📖 Table of Contents
+
+- [Architecture](#-architecture)
+- [Configuration](#-configuration)
+- [LLM Provider Setup](#-llm-provider-setup)
+- [API Usage](#-api-usage)
+- [Deployment](#-deployment)
+- [Development](#-development)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🏗️ Architecture
 
@@ -89,7 +102,7 @@ patchpulse/
 1. **Backend (FastAPI)**
    - REST API for change events and decisions
    - Policy engine with 11+ guardrails
-   - AI-powered risk analysis (DeepSeek API)
+   - AI-powered risk analysis (bring your own LLM!)
    - PostgreSQL database for persistence
    - WebSocket support for real-time updates
 
@@ -104,10 +117,11 @@ patchpulse/
    - GitLab MR analysis
    - Diff parsing and manifest extraction
 
-4. **Slack Integration**
-   - Risk notifications
-   - Interactive approval buttons
-   - Decision summaries
+4. **Notification Integrations**
+   - Slack notifications with interactive approval buttons
+   - Email notifications
+   - Microsoft Teams integration
+   - PagerDuty integration
 
 5. **Dashboard UI**
    - Real-time decision monitoring
@@ -117,48 +131,14 @@ patchpulse/
 
 ### Data Flow
 
+```
 1. Developer creates PR/MR → Git integration detects change
 2. Change event sent to backend → Policy engine evaluates
-3. AI analysis runs → Security scan, recommendations, predictions
+3. AI analysis runs (if configured) → Security scan, recommendations, predictions
 4. Risk score calculated (0-100) → Decision made (allow/block)
-5. Notification sent to Slack → Decision stored in database
+5. Notification sent to Slack/Teams → Decision stored in database
 6. Dashboard updates in real-time via WebSocket
-
-## 🛡️ Features
-
-### AI-Powered Guardrails
-- 11+ rule-based guardrails (resource limits, HPA, security contexts, etc.)
-- AI security vulnerability scanning
-- Explainable decisions with concrete evidence
-
-### Intelligent Risk Analysis
-- Hybrid scoring: 60% rule-based + 40% AI
-- AI recommendations with code-level suggestions
-- Incident prediction based on historical patterns
-- Cost optimization suggestions
-
-### Real-Time Monitoring
-- Kubernetes agent provides cluster intelligence
-- WebSocket updates for instant notifications
-- Risk distribution charts and analytics
-
-### Seamless Integrations
-- GitHub & GitLab native integration
-- Slack notifications with interactive buttons
-- REST API for CI/CD pipelines
-
-### Advanced Analytics
-- Comprehensive dashboards
-- Risk trends and decision history
-- Team performance metrics
-- Export and reporting
-
-### Enterprise Security
-- SOC 2 ready architecture
-- Audit logging
-- RBAC with least privilege
-- Zero API key leakage
-- Encrypted communications
+```
 
 ## 🔧 Configuration
 
@@ -176,8 +156,17 @@ POLICY_MODE=advisory
 # Logging
 LOG_LEVEL=INFO
 
-# AI API Key
-DEEPSEEK_API_KEY=your_deepseek_api_key
+# AI Provider - Choose ONE (see LLM Provider Setup section)
+OPENAI_API_KEY=your_openai_api_key
+# OR
+# DEEPSEEK_API_KEY=your_deepseek_api_key
+# OR
+# ANTHROPIC_API_KEY=your_anthropic_api_key
+# OR
+# GEMINI_API_KEY=your_gemini_api_key
+
+# Optional: Specify which provider to use (defaults to first available)
+AI_PROVIDER=openai
 
 # Git Integration
 GITHUB_TOKEN=your_github_token
@@ -191,8 +180,102 @@ JWT_SECRET_KEY=your_jwt_secret
 
 ### Policy Modes
 
-- **advisory**: Logs decisions but doesn't block changes
-- **enforce**: Blocks high-risk changes (score ≥ 70)
+- **`advisory`**: Logs decisions but doesn't block changes (default)
+- **`enforce`**: Blocks high-risk changes (score ≥ 70)
+
+## 🤖 LLM Provider Setup
+
+PatchPulse is **100% open source** and supports **bring your own LLM**. You can use any of these providers:
+
+### Supported Providers
+
+| Provider | Cost | Quality | Setup |
+|----------|------|---------|-------|
+| **OpenAI** | $$$ | ⭐⭐⭐⭐⭐ | `OPENAI_API_KEY=sk-...` |
+| **DeepSeek** | $ | ⭐⭐⭐⭐ | `DEEPSEEK_API_KEY=sk-...` |
+| **Claude** | $$$ | ⭐⭐⭐⭐⭐ | `ANTHROPIC_API_KEY=sk-ant-...` |
+| **Gemini** | $$ | ⭐⭐⭐⭐ | `GEMINI_API_KEY=...` |
+
+### OpenAI
+
+```bash
+export OPENAI_API_KEY=sk-your-key-here
+# Or in .env file:
+echo "OPENAI_API_KEY=sk-your-key-here" >> .env
+```
+
+**Models**: Uses `gpt-4o-mini` by default (cost-effective). You can modify `ai_analyzer.py` to use other models.
+
+### DeepSeek (Recommended for Cost-Conscious Users)
+
+```bash
+export DEEPSEEK_API_KEY=sk-your-key-here
+# Or in .env file:
+echo "DEEPSEEK_API_KEY=sk-your-key-here" >> .env
+```
+
+**Models**: Uses `deepseek-chat` by default. OpenAI-compatible API.
+
+### Claude (Anthropic)
+
+```bash
+# First install the package
+pip install anthropic
+
+export ANTHROPIC_API_KEY=sk-ant-your-key-here
+# Or in .env file:
+echo "ANTHROPIC_API_KEY=sk-ant-your-key-here" >> .env
+```
+
+**Models**: Uses `claude-3-5-sonnet-20241022` by default.
+
+### Google Gemini
+
+```bash
+# First install the package
+pip install google-generativeai
+
+export GEMINI_API_KEY=your-key-here
+# Or in .env file:
+echo "GEMINI_API_KEY=your-key-here" >> .env
+```
+
+**Models**: Uses `gemini-1.5-pro` by default.
+
+### Using a Custom OpenAI-Compatible API
+
+PatchPulse supports any OpenAI-compatible API endpoint (Ollama, LocalAI, vLLM, etc.):
+
+```bash
+# Set a dummy API key (not used for local endpoints)
+export OPENAI_API_KEY=not-used
+
+# Set your custom endpoint
+export OPENAI_BASE_URL=http://localhost:11434/v1  # Ollama example
+# Or
+export OPENAI_BASE_URL=http://localhost:8080/v1   # LocalAI example
+
+# Or in .env file:
+echo "OPENAI_API_KEY=not-used" >> .env
+echo "OPENAI_BASE_URL=http://localhost:11434/v1" >> .env
+```
+
+**Examples:**
+- **Ollama**: `OPENAI_BASE_URL=http://localhost:11434/v1`
+- **LocalAI**: `OPENAI_BASE_URL=http://localhost:8080/v1`
+- **vLLM**: `OPENAI_BASE_URL=http://localhost:8000/v1`
+- **Any OpenAI-compatible service**: Just set the base URL!
+
+The system will automatically use your custom endpoint with the OpenAI client.
+
+### No LLM Required
+
+**PatchPulse works perfectly without any LLM!** If no API key is provided:
+- ✅ All rule-based guardrails work
+- ✅ Risk scoring works
+- ✅ All integrations work
+- ✅ Dashboard works
+- ⚠️ AI-powered features are disabled (security scanning, recommendations, predictions)
 
 ## 📊 API Usage
 
@@ -208,7 +291,10 @@ curl -X POST http://localhost:8000/api/v1/change-events \
     "pr_number": 42,
     "branch": "feature-branch",
     "files": ["k8s/deployment.yaml"],
-    "diff_hunks": [...],
+    "diff_hunks": [{
+      "file": "k8s/deployment.yaml",
+      "hunk": "- limits:\n  cpu: 500m"
+    }],
     "timestamp": "2026-01-01T00:00:00Z"
   }'
 ```
@@ -227,78 +313,47 @@ curl http://localhost:8000/api/v1/analytics/summary
 
 See `/docs` for interactive API documentation.
 
-## 🧪 Testing
-
-### Run Unit Tests
-
-```bash
-cd app/backend
-pytest tests/
-```
-
-### Test in Production-Like Environment
-
-```bash
-cd test_for_prod
-./setup_cluster.sh
-./deploy_patchpulse.sh
-./trigger_test_events.sh
-```
-
 ## 🚢 Deployment
+
+### Docker Compose (Recommended for Quick Start)
+
+```bash
+docker compose up -d
+```
 
 ### Kubernetes (Helm)
 
 ```bash
-# Add Helm repository
-helm repo add patchpulse https://charts.patchpulse.io
-helm repo update
-
 # Install backend
-helm install patchpulse-backend patchpulse/backend \
+helm install patchpulse-backend ./helm/backend \
   --namespace patchpulse \
-  --set policy.mode=advisory
+  --create-namespace \
+  --set policy.mode=advisory \
+  --set ai.openaiApiKey=your_key_here
 
 # Install agent
-helm install patchpulse-agent patchpulse/agent \
+helm install patchpulse-agent ./helm/agent \
   --namespace patchpulse \
   --set backend.url=http://patchpulse-backend:8000
 ```
 
-### Docker Compose (Production)
+### Production Considerations
 
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
-
-## 📚 Documentation
-
-- [Architecture](docs/architecture.md) - System design and components
-- [Quick Start](docs/quickstart.md) - Get up and running quickly
-- [Demo Walkthrough](docs/demo.md) - Step-by-step demo scenario
-- [Runbooks](docs/runbooks.md) - Operational guides
-- [Threat Model](docs/threat-model.md) - Security analysis
-
-## 🔐 Security
-
-- API keys never exposed in logs or responses
-- Least-privilege RBAC for agent
-- Encrypted database connections
-- TLS for all API communications
-- Audit logging for all decisions
-- Rate limiting on API endpoints
-
-See [SECURITY.md](SECURITY.md) for detailed security information.
+- Use environment variables for secrets (never hardcode)
+- Set up proper TLS/SSL certificates
+- Configure database backups
+- Set up monitoring and alerting
+- Use a managed PostgreSQL database for production
 
 ## 🛠️ Development
 
-### Local Development
+### Local Development Setup
 
 ```bash
 # Backend
 cd app/backend
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 
@@ -311,45 +366,107 @@ cd app/integrations/git
 python poller.py
 ```
 
-### Makefile Commands
+### Running Tests
 
 ```bash
-make lint          # Run linters
-make test          # Run tests
-make docker-up     # Start Docker Compose
-make docker-down   # Stop Docker Compose
-make build         # Build Docker images
+# Unit tests
+cd app/backend
+pytest tests/
+
+# Integration tests
+docker compose up -d
+./test_api_endpoints.sh
 ```
+
+### Project Structure
+
+```
+patchpulse/
+├── app/                    # Application code
+│   ├── backend/           # FastAPI backend service
+│   │   ├── main.py        # Main application entry point
+│   │   ├── models.py      # Pydantic models and SQLAlchemy ORM
+│   │   ├── database.py    # Database connection and setup
+│   │   ├── policy_engine.py # Policy evaluation and guardrails
+│   │   ├── ai_analyzer.py # AI-powered risk analysis (BYO LLM!)
+│   │   ├── ai_features.py # Advanced AI features
+│   │   ├── auth.py        # Authentication system
+│   │   └── requirements.txt
+│   ├── agent/             # Kubernetes agent (Go)
+│   │   ├── cmd/agent/     # Agent main application
+│   │   └── Dockerfile
+│   ├── integrations/     # External integrations
+│   │   ├── git/           # GitHub/GitLab integration
+│   │   └── slack/         # Slack notifications
+│   └── ui/                # Dashboard UI
+├── website/               # Marketing website
+├── docs/                  # Technical documentation
+├── helm/                  # Kubernetes Helm charts
+├── docker-compose.yml     # Local development setup
+└── README.md             # This file
+```
+
+## 🛡️ Security
+
+- **API keys never exposed** in logs or responses
+- **Least-privilege RBAC** for agent
+- **Encrypted database** connections
+- **TLS** for all API communications
+- **Audit logging** for all decisions
+- **Rate limiting** on API endpoints
+- **Self-hosted** - your data stays on your infrastructure
+
+See [SECURITY.md](SECURITY.md) for detailed security information.
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+We welcome contributions! PatchPulse is 100% open source and community-driven.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📄 License
 
-Copyright © 2026 PatchPulse. All rights reserved.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+**You are free to:**
+- ✅ Use PatchPulse commercially
+- ✅ Modify the source code
+- ✅ Distribute PatchPulse
+- ✅ Use it privately
+- ✅ Patent use
+- ✅ Place warranty
+
+**You must:**
+- Include the license and copyright notice
 
 ## 🆘 Support
 
-- Documentation: http://localhost:8000/docs
-- Issues: https://github.com/amarkdotdev/patchpulse/issues
-- Email: support@patchpulse.io
+- **Documentation**: http://localhost:8000/docs (when running locally)
+- **Issues**: https://github.com/amarkdotdev/patchpulse/issues
+- **Discussions**: https://github.com/amarkdotdev/patchpulse/discussions
 
 ## 🎯 Roadmap
 
-- [ ] Multi-tenant support
+- [ ] Multi-tenant support (in progress)
 - [ ] Custom guardrail DSL
 - [ ] Integration with more Git providers
-- [ ] Advanced AI models
+- [ ] Additional AI provider support
 - [ ] Compliance reporting
-- [ ] Mobile app
+- [ ] Enhanced documentation
+- [ ] Local LLM support (Ollama, LocalAI)
+
+## 🙏 Acknowledgments
+
+Built with ❤️ by the open source community. Special thanks to all contributors!
 
 ---
 
-**Built with ❤️ by the PatchPulse team**
+**🔓 Open Source | 🤖 Bring Your Own LLM | 🚀 Self-Hosted**
+
+**Made with ❤️ for the Kubernetes community**

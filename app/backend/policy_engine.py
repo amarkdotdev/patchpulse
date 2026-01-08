@@ -40,7 +40,7 @@ class GuardrailRegistry:
                     results.append(result)
             except Exception as e:
                 # Log error but don't fail entire evaluation
-                print(f"Error in guardrail {guardrail.__name__}: {e}")
+                logger.error(f"Error in guardrail {guardrail.__name__}: {e}")
         return results
 
 

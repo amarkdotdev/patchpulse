@@ -73,3 +73,5 @@ Emails include:
 - Store credentials securely (environment variables, secrets manager)
 - Use TLS/SSL for SMTP connections
 
+
+

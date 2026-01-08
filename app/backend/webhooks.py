@@ -67,7 +67,8 @@ async def trigger_webhook(webhook: WebhookDB, event_type: str, payload: Dict) ->
         try:
             failure_count = int(webhook.failure_count or "0") + 1
             webhook.failure_count = str(failure_count)
-        except:
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Failed to update webhook failure count: {e}")
             pass
         return False
 
@@ -108,4 +109,5 @@ async def trigger_webhooks_for_decision(
         # Update last_triggered
         webhook.last_triggered = datetime.utcnow()
         db.commit()
+
 

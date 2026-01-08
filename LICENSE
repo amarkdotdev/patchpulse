@@ -1,21 +1,40 @@
-MIT License
+PatchPulse Non-Commercial License
 
 Copyright (c) 2026 PatchPulse Contributors
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software and associated documentation files (the "Software") are provided under
+the following license terms:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+PERMITTED USES:
+- ✅ Personal use
+- ✅ Educational use
+- ✅ Research and development
+- ✅ Internal use within non-profit organizations
+- ✅ Contributing to the PatchPulse project
+- ✅ Forking and modifying for personal/educational purposes
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+PROHIBITED USES:
+- ❌ Commercial use (selling, licensing, or providing as a service)
+- ❌ Use in commercial products or services
+- ❌ Reselling or redistributing for profit
+- ❌ Use by for-profit companies without explicit written permission
+
+COMMERCIAL LICENSING:
+For commercial use, please contact the copyright holders to obtain a commercial license.
+Commercial licenses are available for:
+- SaaS providers
+- Enterprise deployments
+- Commercial products incorporating PatchPulse
+- Consulting services using PatchPulse
+
+TERMS:
+1. You may use, copy, and modify the Software for non-commercial purposes.
+2. You must include this license and copyright notice in all copies.
+3. You may not use the Software for commercial purposes without explicit permission.
+4. The Software is provided "AS IS", without warranty of any kind.
+5. In no event shall the authors be liable for any damages arising from use of the Software.
+
+For commercial licensing inquiries, please contact: licensing@patchpulse.dev
+
+This license is designed to protect the open-source nature of PatchPulse while ensuring
+that commercial use requires proper licensing and supports the project's development.

@@ -6,7 +6,7 @@
 
 I'm excited to announce the launch of **PatchPulse** - a 100% open-source, self-hosted platform that prevents production incidents by analyzing Kubernetes changes before deployment.
 
-**🔓 Fully Open Source (MIT License)**
+**🔓 Fully Open Source (Non-Commercial License)**
 - Complete transparency - audit every line of code
 - No vendor lock-in - self-host everything
 - Community-driven development

@@ -6,7 +6,7 @@ PatchPulse is a self-hosted, open-source solution that prevents production incid
 
 ## ✨ Key Features
 
-- **🔓 Fully Open Source** - MIT License, no vendor lock-in
+- **🔓 Fully Open Source** - Non-commercial license, no vendor lock-in
 - **🤖 Bring Your Own LLM** - Use OpenAI, DeepSeek, Claude, Gemini, or any OpenAI-compatible API
 - **🏠 Self-Hosted** - Your data stays on your infrastructure
 - **🛡️ 11+ Guardrails** - Rule-based checks for Kubernetes best practices
@@ -431,18 +431,32 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **PatchPulse Non-Commercial License** - see the [LICENSE](LICENSE) file for details.
 
-**You are free to:**
-- ✅ Use PatchPulse commercially
-- ✅ Modify the source code
-- ✅ Distribute PatchPulse
-- ✅ Use it privately
-- ✅ Patent use
-- ✅ Place warranty
+**✅ Permitted Uses:**
+- Personal use
+- Educational use
+- Research and development
+- Internal use within non-profit organizations
+- Contributing to the PatchPulse project
+- Forking and modifying for personal/educational purposes
 
-**You must:**
-- Include the license and copyright notice
+**❌ Prohibited Uses:**
+- Commercial use (selling, licensing, or providing as a service)
+- Use in commercial products or services
+- Reselling or redistributing for profit
+- Use by for-profit companies without explicit written permission
+
+**💼 Commercial Licensing:**
+For commercial use, please contact us to obtain a commercial license. Commercial licenses are available for:
+- SaaS providers
+- Enterprise deployments
+- Commercial products incorporating PatchPulse
+- Consulting services using PatchPulse
+
+**Contact:** licensing@patchpulse.dev
+
+This license protects the open-source nature of PatchPulse while ensuring commercial use requires proper licensing.
 
 ## 🆘 Support
 

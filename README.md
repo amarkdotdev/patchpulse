@@ -19,7 +19,7 @@ PatchPulse is a self-hosted, open-source solution that prevents production incid
 
 ### Prerequisites
 
-- Docker Desktop (running)
+- Docker (running)
 - Python 3.11+ (for local development)
 - Go 1.21+ (for agent development)
 - kubectl (for Kubernetes integration)

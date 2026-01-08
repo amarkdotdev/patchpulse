@@ -39,7 +39,7 @@ services:
     volumes:
       - ./app/backend:/app
       - ./app/ui:/app/ui
-      - ./website:/app/website
+      # Website is in a separate repository - mount separately if needed
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   agent:

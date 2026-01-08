@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/backend/ .
 COPY app/ui/ /app/ui/
-COPY website/ /app/website/
+# Website is in a separate repository - not included in open source build
 
 EXPOSE 8000
 

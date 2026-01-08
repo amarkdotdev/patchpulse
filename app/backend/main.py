@@ -138,13 +138,21 @@ async def dashboard_redirect():
 
 @app.get("/")
 async def root():
-    """Serve marketing index page at root."""
-    from fastapi.responses import FileResponse
+    """Serve marketing index page at root (if available)."""
+    from fastapi.responses import FileResponse, JSONResponse
     website_paths = ["/app/website", "website", os.path.join(os.getcwd(), "website")]
     for base_path in website_paths:
         index_path = os.path.join(base_path, "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
+    # If website not available, return API info
+    return JSONResponse({
+        "name": "PatchPulse API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "dashboard": "/dashboard",
+        "website": "https://patchpulse.dev"
+    })
     return {"name": "PatchPulse API", "version": "1.0.0"}
 
 
@@ -1353,6 +1361,7 @@ async def serve_marketing(path: str):
         raise HTTPException(status_code=404)
     
     # Try website directory first (in Docker it's /app/website)
+    # Note: Website is in a separate repository and may not be available
     website_paths = ["/app/website", "website"]
     for base_path in website_paths:
         # Direct file path

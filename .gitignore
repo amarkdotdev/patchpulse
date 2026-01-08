@@ -50,3 +50,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Website (separate repository)
+website/

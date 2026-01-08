@@ -474,6 +474,14 @@ This license protects the open-source nature of PatchPulse while ensuring commer
 - [ ] Enhanced documentation
 - [ ] Local LLM support (Ollama, LocalAI)
 
+## 👨‍💻 About the Creator
+
+PatchPulse was created by **Aaron Mark**, a passionate DevOps engineer from **Israel** 🇮🇱. 
+
+After experiencing countless production incidents that could have been prevented, Aaron built PatchPulse to help engineering teams ship with confidence. Israel is Aaron's home, and it's from this innovative tech ecosystem that PatchPulse was born.
+
+The project reflects the values of the Israeli tech community: innovation, pragmatism, and a focus on solving real problems that engineers face every day.
+
 ## 🙏 Acknowledgments
 
 Built with ❤️ by the open source community. Special thanks to all contributors!
@@ -482,4 +490,4 @@ Built with ❤️ by the open source community. Special thanks to all contributo
 
 **🔓 Open Source | 🤖 Bring Your Own LLM | 🚀 Self-Hosted**
 
-**Made with ❤️ for the Kubernetes community**
+**Made with ❤️ in Israel for the Kubernetes community worldwide**

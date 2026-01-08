@@ -399,7 +399,6 @@ patchpulse/
 │   │   ├── git/           # GitHub/GitLab integration
 │   │   └── slack/         # Slack notifications
 │   └── ui/                # Dashboard UI
-├── website/               # Marketing website
 ├── docs/                  # Technical documentation
 ├── helm/                  # Kubernetes Helm charts
 ├── docker-compose.yml     # Local development setup

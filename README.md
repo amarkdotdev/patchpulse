@@ -140,11 +140,12 @@ Once PatchPulse is running, access it at:
    - Microsoft Teams integration
    - PagerDuty integration
 
-5. **Dashboard UI**
-   - Real-time decision monitoring
-   - Risk visualization
-   - Analytics and reporting
-   - Export functionality
+5. **Dashboard UI** (Primary Interface)
+   - Real-time decision monitoring via WebSocket
+   - Risk visualization and analytics
+   - Decision history and filtering
+   - Export functionality (CSV/JSON)
+   - Accessible at `/dashboard` endpoint
 
 ### Data Flow
 
@@ -415,7 +416,7 @@ patchpulse/
 │   ├── integrations/     # External integrations
 │   │   ├── git/           # GitHub/GitLab integration
 │   │   └── slack/         # Slack notifications
-│   └── ui/                # Dashboard UI
+│   └── ui/                # Dashboard UI (served at /dashboard)
 ├── docs/                  # Technical documentation
 ├── helm/                  # Kubernetes Helm charts
 ├── docker-compose.yml     # Local development setup

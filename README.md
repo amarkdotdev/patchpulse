@@ -73,16 +73,33 @@ docker compose logs -f backend
 
 ### 4. Access the Application
 
-- **Website**: http://localhost:8000/
+Once PatchPulse is running, access it at:
+
 - **Dashboard**: http://localhost:8000/dashboard
-- **API Docs**: http://localhost:8000/docs
+  - Main user interface for monitoring decisions, viewing analytics, and managing configurations
+  - Real-time updates via WebSocket
+  - Risk visualization and decision history
+
+- **API Documentation**: http://localhost:8000/docs
+  - Interactive Swagger/OpenAPI documentation
+  - Test API endpoints directly from the browser
+  - Full API reference
+
 - **Health Check**: http://localhost:8000/health
+  - Service health status
+  - Database connectivity check
 
-### 5. Create Your First Account
+- **API Root**: http://localhost:8000/api
+  - API information and available endpoints
 
-1. Go to http://localhost:8000/signup
-2. Create an account
-3. Start using PatchPulse!
+### 5. Start Using PatchPulse
+
+1. **Access the Dashboard**: Open http://localhost:8000/dashboard in your browser
+2. **View Decisions**: See real-time risk analysis and decisions
+3. **Configure Integrations**: Set up GitHub, GitLab, Slack, or other integrations via the API
+4. **Monitor Analytics**: Track risk trends, blocked changes, and system health
+
+**Note**: The dashboard is the main interface for PatchPulse. The website (patchpulse.dev) is a separate marketing site and not part of this repository.
 
 ## 📖 Table of Contents
 

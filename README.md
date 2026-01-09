@@ -341,18 +341,58 @@ docker compose up -d
 
 ### Kubernetes (Helm)
 
+**Option 1: Using your `.env` file (Recommended)**
+
 ```bash
-# Install backend
+# Create a values file from your .env
+# This reads your .env file and creates Helm values
+cat > /tmp/patchpulse-values.yaml <<EOF
+env:
+  DATABASE_URL: "postgresql://patchpulse:patchpulse@postgres:5432/patchpulse"
+  POLICY_MODE: "advisory"
+  LOG_LEVEL: "INFO"
+  OPENAI_API_KEY: "$(grep OPENAI_API_KEY .env | cut -d '=' -f2)"
+  DEEPSEEK_API_KEY: "$(grep DEEPSEEK_API_KEY .env | cut -d '=' -f2 || echo '')"
+  ANTHROPIC_API_KEY: "$(grep ANTHROPIC_API_KEY .env | cut -d '=' -f2 || echo '')"
+  GEMINI_API_KEY: "$(grep GEMINI_API_KEY .env | cut -d '=' -f2 || echo '')"
+EOF
+
+# Install backend using values from .env
 helm install patchpulse-backend ./helm/backend \
   --namespace patchpulse \
   --create-namespace \
-  --set policy.mode=advisory \
-  --set ai.openaiApiKey=your_key_here
+  --values /tmp/patchpulse-values.yaml
 
 # Install agent
 helm install patchpulse-agent ./helm/agent \
   --namespace patchpulse \
-  --set backend.url=http://patchpulse-backend:8000
+  --set env.BACKEND_URL=http://patchpulse-backend:8000
+```
+
+**Option 2: Using --set-file (Alternative)**
+
+```bash
+# Install backend with API key from .env file
+helm install patchpulse-backend ./helm/backend \
+  --namespace patchpulse \
+  --create-namespace \
+  --set env.OPENAI_API_KEY="$(grep OPENAI_API_KEY .env | cut -d '=' -f2)" \
+  --set env.POLICY_MODE=advisory
+
+# Install agent
+helm install patchpulse-agent ./helm/agent \
+  --namespace patchpulse \
+  --set env.BACKEND_URL=http://patchpulse-backend:8000
+```
+
+**Option 3: Manual values override**
+
+Edit `helm/backend/values.yaml` and add your API keys to the `env` section, then install:
+
+```bash
+helm install patchpulse-backend ./helm/backend \
+  --namespace patchpulse \
+  --create-namespace
 ```
 
 ### Production Considerations

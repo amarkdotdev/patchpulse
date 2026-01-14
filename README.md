@@ -151,6 +151,167 @@ Once PatchPulse is running, access it at:
 
 ---
 
+## 🔄 How PatchPulse Works
+
+### Deployment Models
+
+PatchPulse can be deployed in two ways:
+
+#### Option 1: Standalone Mode (Recommended for Getting Started)
+
+**Backend runs separately** (Docker Compose, VM, or anywhere):
+- Backend service runs independently
+- Agent runs **outside** your Kubernetes cluster
+- Agent connects to your cluster using `kubeconfig`
+- Best for: Testing, development, or when you don't want to deploy into your cluster
+
+```bash
+# 1. Start backend (runs anywhere)
+docker compose up -d
+
+# 2. Run agent locally (connects to your cluster via kubeconfig)
+cd app/agent
+export BACKEND_URL=http://localhost:8000
+export KUBECONFIG=$HOME/.kube/config  # Points to your cluster
+go run cmd/agent/main.go
+```
+
+#### Option 2: In-Cluster Mode (Production)
+
+**Both backend and agent run inside Kubernetes**:
+- Backend deployed as a Kubernetes Deployment
+- Agent deployed in the same or different namespace
+- Agent uses in-cluster config (ServiceAccount)
+- Best for: Production deployments, full integration
+
+```bash
+# Deploy both backend and agent to your cluster
+helm install patchpulse-backend ./helm/backend --namespace patchpulse
+helm install patchpulse-agent ./helm/agent --namespace patchpulse
+```
+
+### How It Analyzes Your Changes
+
+PatchPulse works in **two ways**:
+
+#### 1. **Git Integration** (Pre-Deployment Analysis)
+- Monitors GitHub/GitLab PRs/MRs
+- Analyzes Kubernetes manifests in diffs
+- Evaluates guardrails **before** code is merged
+- Sends notifications if risky changes detected
+
+```bash
+# Example: PR with risky deployment.yaml
+# PatchPulse detects: "Missing resource limits"
+# → Risk score: 50
+# → Decision: Advisory (allows, but warns)
+```
+
+#### 2. **Cluster Monitoring** (Post-Deployment)
+- Agent watches your Kubernetes cluster
+- Collects deployment signals, pod events, node status
+- Detects issues in running workloads
+- Provides real-time cluster health insights
+
+### Complete Workflow
+
+```
+┌─────────────────┐
+│  Developer      │
+│  Creates PR     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐     ┌──────────────────┐
+│  Git Integration│────▶│  PatchPulse      │
+│  (GitHub/GitLab)│     │  Backend         │
+└─────────────────┘     │  (FastAPI)       │
+                        └────────┬─────────┘
+                                 │
+                        ┌────────▼─────────┐
+                        │  Policy Engine   │
+                        │  + AI Analysis   │
+                        └────────┬─────────┘
+                                 │
+                        ┌────────▼─────────┐
+                        │  Risk Score      │
+                        │  Decision        │
+                        └────────┬─────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐   ┌─────────────────┐
+│  Notification   │    │  Dashboard       │   │  Kubernetes     │
+│  (Slack/Email)  │    │  (Web UI)        │   │  Agent          │
+└─────────────────┘    └─────────────────┘   └────────┬────────┘
+                                                       │
+                                                       ▼
+                                              ┌─────────────────┐
+                                              │  Your K8s       │
+                                              │  Cluster        │
+                                              └─────────────────┘
+```
+
+### Connecting to Your Kubernetes Cluster
+
+#### For Standalone Mode:
+
+1. **Ensure you have access to your cluster:**
+```bash
+# Test cluster access
+kubectl get nodes
+
+# If using a remote cluster, make sure kubeconfig is set
+export KUBECONFIG=$HOME/.kube/config
+```
+
+2. **Start the agent pointing to your cluster:**
+```bash
+# The agent will automatically use your kubeconfig
+export BACKEND_URL=http://localhost:8000  # Where backend is running
+cd app/agent
+go run cmd/agent/main.go
+```
+
+#### For In-Cluster Mode:
+
+1. **Deploy PatchPulse to your cluster:**
+```bash
+# Create namespace
+kubectl create namespace patchpulse
+
+# Deploy backend
+helm install patchpulse-backend ./helm/backend \
+  --namespace patchpulse \
+  --set env.DATABASE_URL="postgresql://..."
+
+# Deploy agent (automatically connects to cluster)
+helm install patchpulse-agent ./helm/agent \
+  --namespace patchpulse \
+  --set env.BACKEND_URL="http://patchpulse-backend:8000"
+```
+
+2. **The agent automatically uses in-cluster config** (no kubeconfig needed)
+
+### What Gets Analyzed?
+
+#### From Git (PR/MR Analysis):
+- Kubernetes manifests (Deployments, Services, ConfigMaps, etc.)
+- Changes to resource limits, requests, probes
+- Security context changes
+- Image tag updates
+- Network policy changes
+
+#### From Cluster (Agent Monitoring):
+- Deployment availability and replica counts
+- Pod restart counts
+- Node readiness status
+- Warning events
+- Resource utilization trends
+
+---
+
 ## 📖 Table of Contents
 
 - [Architecture](#-architecture)

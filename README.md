@@ -1,10 +1,40 @@
 # PatchPulse
 
+<div align="center">
+
 **🔓 100% Open Source | 🤖 Bring Your Own LLM | 🚀 Self-Hosted Kubernetes Risk Analysis**
+
+[![License](https://img.shields.io/badge/license-Non--Commercial-blue.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/amarkdotdev/patchpulse?style=social)](https://github.com/amarkdotdev/patchpulse)
+[![Website](https://img.shields.io/badge/website-patchpulse.dev-blue)](https://patchpulse.dev)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-yellow)](https://buymeacoffee.com/aaronmark)
+
+**Prevent production incidents before they happen**
+
+[Quick Start](#-quick-start) • [Documentation](#-documentation) • [Features](#-key-features) • [Support](#-support)
+
+</div>
+
+---
+
+## 🎯 What is PatchPulse?
 
 PatchPulse is a self-hosted, open-source solution that prevents production incidents by analyzing infrastructure changes and cluster signals before deployment. It combines rule-based guardrails with AI-powered analysis to provide explainable risk scores and automated enforcement.
 
+### Why PatchPulse?
+
+- **🛡️ Prevent Incidents**: Catch risky changes before they reach production
+- **🔍 Explainable Decisions**: Understand why changes are flagged with detailed reasoning
+- **🤖 AI-Powered**: Optional AI analysis for security scanning and recommendations
+- **⚡ Real-Time**: Instant notifications and WebSocket updates
+- **🔓 100% Open Source**: No vendor lock-in, full control over your data
+- **🏠 Self-Hosted**: Your data stays on your infrastructure
+
+---
+
 ## ✨ Key Features
+
+### Core Capabilities
 
 - **🔓 Fully Open Source** - Non-commercial license, no vendor lock-in
 - **🤖 Bring Your Own LLM** - Use OpenAI, DeepSeek, Claude, Gemini, or any OpenAI-compatible API
@@ -15,23 +45,41 @@ PatchPulse is a self-hosted, open-source solution that prevents production incid
 - **🔌 Integrations** - GitHub, GitLab, Slack, Teams, PagerDuty, Email
 - **📊 Enterprise Features** - Admission webhooks, policy bundles, SBOM verification, multi-tenancy
 
+### Guardrails Included
+
+1. **Resource Limits** - Ensures CPU/memory limits are set
+2. **Resource Requests** - Validates resource requests are configured
+3. **Readiness Probes** - Checks for readiness probe configuration
+4. **Liveness Probes** - Validates liveness probe setup
+5. **Security Context** - Enforces security context settings
+6. **Image Tags** - Prevents `latest` tag usage
+7. **Namespace Validation** - Ensures proper namespace usage
+8. **Service Account** - Validates service account configuration
+9. **Network Policies** - Checks network policy compliance
+10. **Resource Quotas** - Validates resource quota adherence
+11. **Pod Disruption Budgets** - Ensures PDB configuration
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker (running)
-- Python 3.11+ (for local development)
-- Go 1.21+ (for agent development)
-- kubectl (for Kubernetes integration)
+- **Docker** (running) - Required for containerized deployment
+- **Python 3.11+** - For local development
+- **Go 1.21+** - For agent development (optional)
+- **kubectl** - For Kubernetes integration (optional)
 
-### 1. Clone the Repository
+### Installation Steps
+
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/amarkdotdev/patchpulse.git
 cd patchpulse
 ```
 
-### 2. Configure Your LLM Provider
+#### 2. Configure Your LLM Provider (Optional)
 
 PatchPulse supports multiple AI providers. **You only need to provide an API key for ONE provider:**
 
@@ -59,7 +107,7 @@ echo "OPENAI_API_KEY=sk-your-key-here" >> .env
 
 **💡 No LLM? No Problem!** PatchPulse works without AI - you'll get rule-based guardrails and risk scoring. AI features will be disabled gracefully.
 
-### 3. Start PatchPulse
+#### 3. Start PatchPulse
 
 ```bash
 # Start all services
@@ -71,7 +119,7 @@ docker compose logs -f backend
 # Wait for services to be ready (about 10-15 seconds)
 ```
 
-### 4. Access the Application
+#### 4. Access the Application
 
 Once PatchPulse is running, access it at:
 
@@ -92,7 +140,7 @@ Once PatchPulse is running, access it at:
 - **API Root**: http://localhost:8000/api
   - API information and available endpoints
 
-### 5. Start Using PatchPulse
+#### 5. Start Using PatchPulse
 
 1. **Access the Dashboard**: Open http://localhost:8000/dashboard in your browser
 2. **View Decisions**: See real-time risk analysis and decisions
@@ -100,6 +148,8 @@ Once PatchPulse is running, access it at:
 4. **Monitor Analytics**: Track risk trends, blocked changes, and system health
 
 **Note**: The dashboard is the main interface for PatchPulse. The website (patchpulse.dev) is a separate marketing site and not part of this repository.
+
+---
 
 ## 📖 Table of Contents
 
@@ -109,43 +159,47 @@ Once PatchPulse is running, access it at:
 - [API Usage](#-api-usage)
 - [Deployment](#-deployment)
 - [Development](#-development)
+- [Use Cases](#-use-cases)
 - [Contributing](#-contributing)
+- [Support](#-support)
 - [License](#-license)
+
+---
 
 ## 🏗️ Architecture
 
 ### Components
 
-1. **Backend (FastAPI)**
-   - REST API for change events and decisions
-   - Policy engine with 11+ guardrails
-   - AI-powered risk analysis (bring your own LLM!)
-   - PostgreSQL database for persistence
-   - WebSocket support for real-time updates
+#### 1. Backend (FastAPI)
+- REST API for change events and decisions
+- Policy engine with 11+ guardrails
+- AI-powered risk analysis (bring your own LLM!)
+- PostgreSQL database for persistence
+- WebSocket support for real-time updates
 
-2. **Agent (Go)**
-   - Kubernetes cluster monitoring
-   - Resource snapshotting
-   - Event watching
-   - Least-privilege RBAC
+#### 2. Agent (Go)
+- Kubernetes cluster monitoring
+- Resource snapshotting
+- Event watching
+- Least-privilege RBAC
 
-3. **Git Integrations**
-   - GitHub PR analysis
-   - GitLab MR analysis
-   - Diff parsing and manifest extraction
+#### 3. Git Integrations
+- GitHub PR analysis
+- GitLab MR analysis
+- Diff parsing and manifest extraction
 
-4. **Notification Integrations**
-   - Slack notifications with interactive approval buttons
-   - Email notifications
-   - Microsoft Teams integration
-   - PagerDuty integration
+#### 4. Notification Integrations
+- Slack notifications with interactive approval buttons
+- Email notifications
+- Microsoft Teams integration
+- PagerDuty integration
 
-5. **Dashboard UI** (Primary Interface)
-   - Real-time decision monitoring via WebSocket
-   - Risk visualization and analytics
-   - Decision history and filtering
-   - Export functionality (CSV/JSON)
-   - Accessible at `/dashboard` endpoint
+#### 5. Dashboard UI (Primary Interface)
+- Real-time decision monitoring via WebSocket
+- Risk visualization and analytics
+- Decision history and filtering
+- Export functionality (CSV/JSON)
+- Accessible at `/dashboard` endpoint
 
 ### Data Flow
 
@@ -157,6 +211,29 @@ Once PatchPulse is running, access it at:
 5. Notification sent to Slack/Teams → Decision stored in database
 6. Dashboard updates in real-time via WebSocket
 ```
+
+### System Architecture Diagram
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│   GitHub    │────▶│ Git Poller   │────▶│  Backend    │
+│   GitLab    │     │              │     │  (FastAPI)  │
+└─────────────┘     └──────────────┘     └──────┬──────┘
+                                                 │
+┌─────────────┐     ┌──────────────┐             │
+│ Kubernetes  │────▶│   Agent     │─────────────┘
+│   Cluster   │     │    (Go)     │
+└─────────────┘     └──────────────┘
+                                                 │
+┌─────────────┐     ┌──────────────┐     ┌─────▼──────┐
+│   Slack     │◀────│ Notifications│◀────│ PostgreSQL │
+│   Teams     │     │              │     │  Database  │
+│  PagerDuty  │     └──────────────┘     └────────────┘
+│   Email     │
+└─────────────┘
+```
+
+---
 
 ## 🔧 Configuration
 
@@ -199,7 +276,16 @@ JWT_SECRET_KEY=your_jwt_secret
 ### Policy Modes
 
 - **`advisory`**: Logs decisions but doesn't block changes (default)
+  - Best for: Testing, gradual rollout, learning mode
+  - All decisions are logged and visible in dashboard
+  - No changes are blocked
+
 - **`enforce`**: Blocks high-risk changes (score ≥ 70)
+  - Best for: Production environments
+  - High-risk changes are automatically blocked
+  - Requires manual approval for blocked changes
+
+---
 
 ## 🤖 LLM Provider Setup
 
@@ -295,6 +381,8 @@ The system will automatically use your custom endpoint with the OpenAI client.
 - ✅ Dashboard works
 - ⚠️ AI-powered features are disabled (security scanning, recommendations, predictions)
 
+---
+
 ## 📊 API Usage
 
 ### Create Change Event
@@ -329,7 +417,28 @@ curl http://localhost:8000/api/v1/decisions?limit=10
 curl http://localhost:8000/api/v1/analytics/summary
 ```
 
+### Get Decision by ID
+
+```bash
+curl http://localhost:8000/api/v1/decisions/{decision_id}
+```
+
+### Filter Decisions
+
+```bash
+# Filter by risk score
+curl "http://localhost:8000/api/v1/decisions?min_risk=50&max_risk=100"
+
+# Filter by source
+curl "http://localhost:8000/api/v1/decisions?source=github"
+
+# Filter by date range
+curl "http://localhost:8000/api/v1/decisions?start_date=2026-01-01&end_date=2026-01-31"
+```
+
 See `/docs` for interactive API documentation.
+
+---
 
 ## 🚢 Deployment
 
@@ -402,6 +511,11 @@ helm install patchpulse-backend ./helm/backend \
 - Configure database backups
 - Set up monitoring and alerting
 - Use a managed PostgreSQL database for production
+- Configure rate limiting
+- Set up log aggregation
+- Enable audit logging
+
+---
 
 ## 🛠️ Development
 
@@ -455,13 +569,71 @@ patchpulse/
 │   │   └── Dockerfile
 │   ├── integrations/     # External integrations
 │   │   ├── git/           # GitHub/GitLab integration
-│   │   └── slack/         # Slack notifications
+│   │   ├── slack/         # Slack notifications
+│   │   ├── teams/         # Microsoft Teams integration
+│   │   ├── pagerduty/     # PagerDuty integration
+│   │   └── email/         # Email notifications
 │   └── ui/                # Dashboard UI (served at /dashboard)
 ├── docs/                  # Technical documentation
 ├── helm/                  # Kubernetes Helm charts
 ├── docker-compose.yml     # Local development setup
 └── README.md             # This file
 ```
+
+---
+
+## 💼 Use Cases
+
+### 1. CI/CD Pipeline Integration
+
+Integrate PatchPulse into your CI/CD pipeline to automatically analyze PRs:
+
+```yaml
+# GitHub Actions example
+- name: Analyze with PatchPulse
+  run: |
+    curl -X POST $PATCHPULSE_URL/api/v1/change-events \
+      -H "Content-Type: application/json" \
+      -d @change-event.json
+```
+
+### 2. Pre-Deployment Validation
+
+Validate Kubernetes manifests before deployment:
+
+```bash
+# Analyze deployment manifests
+kubectl apply --dry-run=client -f deployment.yaml | \
+  patchpulse analyze --source=manual
+```
+
+### 3. Compliance Auditing
+
+Track compliance with Kubernetes best practices:
+
+```bash
+# Get compliance report
+curl http://localhost:8000/api/v1/analytics/compliance
+```
+
+### 4. Incident Prevention
+
+Prevent production incidents by catching risky changes:
+
+- Missing resource limits
+- Security misconfigurations
+- Image tag issues
+- Network policy violations
+
+### 5. Team Education
+
+Use PatchPulse to educate teams on Kubernetes best practices:
+
+- Real-time feedback on PRs
+- Detailed explanations of guardrail violations
+- Historical analytics on common mistakes
+
+---
 
 ## 🛡️ Security
 
@@ -475,6 +647,8 @@ patchpulse/
 
 See [SECURITY.md](SECURITY.md) for detailed security information.
 
+---
+
 ## 🤝 Contributing
 
 We welcome contributions! PatchPulse is 100% open source and community-driven.
@@ -486,6 +660,18 @@ We welcome contributions! PatchPulse is 100% open source and community-driven.
 5. Open a Pull Request
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+### Areas for Contribution
+
+- 🐛 Bug fixes
+- ✨ New features
+- 📚 Documentation improvements
+- 🧪 Test coverage
+- 🌐 Translations
+- 🎨 UI/UX improvements
+- 🔌 New integrations
+
+---
 
 ## 📄 License
 
@@ -512,25 +698,55 @@ For commercial use, please contact us to obtain a commercial license. Commercial
 - Commercial products incorporating PatchPulse
 - Consulting services using PatchPulse
 
-**Contact:** licensing@patchpulse.dev
+**Contact:** amarkdotdev@gmail.com
 
 This license protects the open-source nature of PatchPulse while ensuring commercial use requires proper licensing.
 
+---
+
 ## 🆘 Support
 
+### Getting Help
+
 - **Documentation**: http://localhost:8000/docs (when running locally)
+- **Website**: https://patchpulse.dev
 - **Issues**: https://github.com/amarkdotdev/patchpulse/issues
 - **Discussions**: https://github.com/amarkdotdev/patchpulse/discussions
+- **Email**: amarkdotdev@gmail.com
+
+### Community
+
+- ⭐ Star us on GitHub if you find PatchPulse useful!
+- 🐛 Report bugs via GitHub Issues
+- 💡 Suggest features via GitHub Discussions
+- 📖 Improve documentation via Pull Requests
+
+---
+
+## ☕ Support the Project
+
+If PatchPulse has been helpful to you, consider supporting the project:
+
+**[☕ Buy Me a Coffee](https://buymeacoffee.com/aaronmark)**
+
+Your support helps maintain and improve PatchPulse. Thank you! 🙏
+
+---
 
 ## 🎯 Roadmap
 
 - [ ] Multi-tenant support (in progress)
 - [ ] Custom guardrail DSL
-- [ ] Integration with more Git providers
+- [ ] Integration with more Git providers (Bitbucket, Azure DevOps)
 - [ ] Additional AI provider support
-- [ ] Compliance reporting
+- [ ] Compliance reporting (SOC2, ISO27001)
 - [ ] Enhanced documentation
 - [ ] Local LLM support (Ollama, LocalAI)
+- [ ] Webhook support for real-time PR analysis
+- [ ] Custom risk scoring algorithms
+- [ ] Policy templates library
+
+---
 
 ## 👨‍💻 About the Creator
 
@@ -540,12 +756,34 @@ After experiencing countless production incidents that could have been prevented
 
 The project reflects the values of the Israeli tech community: innovation, pragmatism, and a focus on solving real problems that engineers face every day.
 
+**Connect with Aaron:**
+- 📧 Email: amarkdotdev@gmail.com
+- 🐙 GitHub: [@amarkdotdev](https://github.com/amarkdotdev)
+- ☕ Buy Me a Coffee: [buymeacoffee.com/aaronmark](https://buymeacoffee.com/aaronmark)
+
+---
+
 ## 🙏 Acknowledgments
 
 Built with ❤️ by the open source community. Special thanks to all contributors!
 
+### Technologies Used
+
+- **FastAPI** - Modern Python web framework
+- **PostgreSQL** - Robust relational database
+- **Go** - High-performance Kubernetes agent
+- **React/Vue** - Dashboard UI (if applicable)
+- **Docker** - Containerization
+- **Kubernetes** - Container orchestration
+
 ---
+
+<div align="center">
 
 **🔓 Open Source | 🤖 Bring Your Own LLM | 🚀 Self-Hosted**
 
 **Made with ❤️ in Israel for the Kubernetes community worldwide**
+
+[⭐ Star on GitHub](https://github.com/amarkdotdev/patchpulse) • [📖 Documentation](https://patchpulse.dev) • [☕ Buy Me a Coffee](https://buymeacoffee.com/aaronmark) • [🐛 Report Bug](https://github.com/amarkdotdev/patchpulse/issues)
+
+</div>

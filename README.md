@@ -9,9 +9,9 @@
 [![Website](https://img.shields.io/badge/website-patchpulse.dev-blue)](https://patchpulse.dev)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-yellow)](https://buymeacoffee.com/aaronmark)
 
-**Prevent production incidents before they happen**
+**Stop preventable production incidents before they happen**
 
-[Quick Start](#-quick-start) • [Documentation](#-documentation) • [Features](#-key-features) • [Support](#-support)
+[Quick Start](#-quick-start) • [How It Works](#-how-patchpulse-works) • [Features](#-key-features) • [Support](#-need-help)
 
 </div>
 

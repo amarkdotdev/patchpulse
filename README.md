@@ -5,7 +5,6 @@
 **🔓 100% Open Source | 🤖 Bring Your Own LLM | 🚀 Self-Hosted Kubernetes Risk Analysis**
 
 [![License](https://img.shields.io/badge/license-Non--Commercial-blue.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/amarkdotdev/patchpulse?style=social)](https://github.com/amarkdotdev/patchpulse)
 [![Website](https://img.shields.io/badge/website-patchpulse.dev-blue)](https://patchpulse.dev)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-☕-yellow)](https://buymeacoffee.com/aaronmark)
 
@@ -876,7 +875,6 @@ This license protects the open-source nature of PatchPulse while ensuring commer
 **Email**: amarkdotdev@gmail.com
 
 **Ways to help:**
-- ⭐ Star the repo if you find it useful (helps others discover it)
 - 🐛 Found a bug? Open an issue - I'll try to fix it
 - 💡 Have an idea? Open a discussion or issue
 - 📖 Docs unclear? Send a PR to improve them

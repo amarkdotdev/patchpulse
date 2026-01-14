@@ -5,16 +5,15 @@ services:
       POSTGRES_DB: patchpulse
       POSTGRES_USER: patchpulse
       POSTGRES_PASSWORD: patchpulse
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+    - 5433:5432
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U patchpulse"]
+      test:
+      - CMD-SHELL
+      - pg_isready -U patchpulse
       interval: 10s
       timeout: 5s
       retries: 5
-
   backend:
     build:
       context: .
@@ -23,25 +22,17 @@ services:
       DATABASE_URL: postgresql://patchpulse:patchpulse@postgres:5432/patchpulse
       POLICY_MODE: advisory
       LOG_LEVEL: INFO
-      # AI Provider - set one of these (or use AI_PROVIDER env var to specify)
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       AI_PROVIDER: ${AI_PROVIDER:-}
-    env_file:
-      - .env
+    env_file: null
     ports:
-      - "8000:8000"
+    - 8001:8000
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./app/backend:/app
-      - ./app/ui:/app/ui
-      # Website is in a separate repository - mount separately if needed
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
   agent:
     build:
       context: ./app/agent
@@ -49,13 +40,7 @@ services:
     environment:
       BACKEND_URL: http://backend:8000
       KUBECONFIG: /root/.kube/config
-    volumes:
-      - ${HOME}/.kube/config:/root/.kube/config:ro
-    depends_on:
-      - backend
-    # Note: Agent requires access to Kubernetes cluster
-    # For local dev, mount kubeconfig
-
+    depends_on: null
   git-poller:
     build:
       context: ./app/integrations/git
@@ -68,8 +53,5 @@ services:
       GITLAB_URL: ${GITLAB_URL:-https://gitlab.com/api/v4}
       GITLAB_PROJECTS: ${GITLAB_PROJECTS:-}
       POLL_INTERVAL: 60
-    depends_on:
-      - backend
-
-volumes:
-  postgres_data:
+    depends_on: null
+  postgres_data: null

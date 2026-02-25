@@ -27,7 +27,6 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       AI_PROVIDER: ${AI_PROVIDER:-}
-    env_file: null
     ports:
     - 8001:8000
     depends_on:
@@ -40,7 +39,6 @@ services:
     environment:
       BACKEND_URL: http://backend:8000
       KUBECONFIG: /root/.kube/config
-    depends_on: null
   git-poller:
     build:
       context: ./app/integrations/git
@@ -53,5 +51,3 @@ services:
       GITLAB_URL: ${GITLAB_URL:-https://gitlab.com/api/v4}
       GITLAB_PROJECTS: ${GITLAB_PROJECTS:-}
       POLL_INTERVAL: 60
-    depends_on: null
-  postgres_data: null

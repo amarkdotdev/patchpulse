@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 logger = logging.getLogger(__name__)
 
 # Get API key once at module load
-_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+_API_KEY = os.getenv("DEEPSEEK_API_KEY") or None
 
 
 def sanitize_for_logging(data: Any) -> Any:
